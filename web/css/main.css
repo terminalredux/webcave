@@ -1,0 +1,100 @@
+body {
+  font-family: 'Roboto', sans-serif;
+}
+#setting-pub-date {
+  display: none;
+}
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  background-color: #C5EFF7;
+}
+img.fr-fic {
+  display: block;
+  margin: auto;
+}
+a.fa-icon:hover {
+  text-decoration: none;
+}
+
+.admin_template .navbar-inverse {
+  border-radius: 0;
+  margin-bottom: 0;
+  border: 0;
+  background-color: #1e282c;
+}
+
+#admin-panel-content {
+  padding-top: 20px;
+  position:absolute;
+  top:50px;
+  left:300px;
+  width: 70%;
+}
+
+/** Bootstrap button **/
+.btn {
+  border-radius: 0;
+}
+/** Bootstrap forms **/
+.form-control {
+  border-radius: 0;
+}
+/** Flash messages **/
+.flash-message {
+  border-radius: 0;
+  color: #fdfdfd;
+  border: 0;
+}
+
+.flash-message.success {
+  background-color: #2ecc71;
+}
+
+.flash-message.error {
+  background-color: #e74c3c;
+}
+
+.flash-message p {
+  margin-bottom: 0;
+}
+/** model status in table**/
+.model-active {
+  background-color: #2ecc71;
+  border-radius: 10px;
+  color: #fefefe;
+}
+.model-hidden {
+  background-color: #e67e22;
+  border-radius: 10px;
+  color: #fefefe;
+}
+.model-removed {
+  background-color: #e74c3c;
+  border-radius: 10px;
+  color: #fefefe;
+}
+.model-edited {
+  background-color: #3498db;
+  border-radius: 10px;
+  color: #fefefe;
+}
+.model-sketch {
+  background-color: #34495e;
+  border-radius: 10px;
+  color: #fefefe;
+}
+/** Article table **/
+.article-status {
+  cursor:pointer;
+}
+.change-status-btn {
+  width: 100%;
+  margin-bottom: 5px;
+  border-radius: 10px;
+  padding: 2px;
+  font-size: 0.9em;
+}
+.date-pending {
+  background-color: #9b59b6;
+  border-radius: 10px;
+  color: #fefefe;
+}
