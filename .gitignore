@@ -1,0 +1,4 @@
+# Bower shit
+/vendor/bower
+# DB conf
+/config/db_connection.php
