@@ -13,6 +13,10 @@ use App\Controllers\{
 class ControllerFactory
 {
   /**
+   * TODO zrobić tak żebym nie musiał za każdym nowym kontrolerem dodawać
+   * go tutaj. Można wykorzystać automatycznego use: \App\Controllers\TuWygenerowanaNazwaKontrolera
+   * przy pomocy file_exists ??? coś takiego. Nazwa kontrolera będzie generowana na podstawie
+   * przekazanago do metody controllerAliasu. 
    * @param string $controllerAlias
    * @return Controller Object
    */

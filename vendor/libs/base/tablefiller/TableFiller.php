@@ -1,5 +1,5 @@
 <?php
-namespace Libs\Base;
+namespace Libs\Base\TableFiller;
 
 use Libs\Database\DbConnection;
 
@@ -28,7 +28,7 @@ abstract class TableFiller
    */
   public function fetch() : ? array {
     $sql = $this->prepareSql();
-  
+
     try {
       $db = new DbConnection();
       $db = $db->connect();
@@ -39,7 +39,13 @@ abstract class TableFiller
       $data = [];
       if ($rows) {
         foreach($rows as $row) {
-          $data[] = $row; // tak dla picu na razie
+          $data[] = new class($row) {
+            public function __construct(array $row) {
+              foreach ($row as $key => $value) {
+                $this->$key = $value;
+              }
+            }
+          };
         }
       }
       $db = null;

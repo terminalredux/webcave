@@ -1,11 +1,11 @@
 <?php
-use App\Components\Helpers\ArticleHelper;
+use App\Components\Helpers\{
+  ArticleHelper,
+  ArticleTableHelper as Helper
+};
 use App\Models\Category\CategoryQuery;
 use App\Models\Article;
 ?>
-<?php foreach ($data as $article) : ?>
-  <?= $article['category_name'] ?><br>
-<?php endforeach; ?>
 
 <h1>Artykuły</h1>
 <small>Sortowanie według ustalonej daty publikacji (malejąco)</small>
@@ -16,7 +16,7 @@ use App\Models\Article;
       <thead>
         <th>Tytuł</th>
         <th>Kategoria</th>
-        <th>User ID</th>
+        <th>Autor</th>
         <th>Data publikacji</th>
         <th>Utworzony</th>
         <th>Zmodyfikowany</th>
@@ -24,16 +24,24 @@ use App\Models\Article;
         <th></th>
       </thead>
       <tbody>
-        <?php foreach ($articles as $article) : ?>
+        <?php foreach ($tableRows as $article) : ?>
+          <?php
+            $isPending = Helper::isPending($article->available_from);
+            $isUpdated = Helper::isUpdated($article->created_at, $article->updated_at);
+            $isRemoved = Helper::isRemoved($article->status);
+            $isPublicated = Helper::isPublicated($article->status);
+            $isNotPublicated = Helper::isNotPublicated($article->status);
+            $isSketch = Helper::isSketch($article->status);
+          ?>
           <tr>
             <td title="<?= $article->title ?>">
-                <?= $article->shortTitle() ?>
+                <?= Helper::shortTitle($article->title) ?>
             </td>
-            <td><?= CategoryQuery::getByID($article->category_id)->name ?></td>
-            <td><?= $article->user_id ?></td>
+            <td><?= $article->category_name ?></td>
+            <td><?= $article->user_username ?></td>
             <td class="text-center">
               <div title="<?= $formatter->dateTime($article->available_from, true) ?>"
-                   class="<?= $article->isPending() ? 'date-pending' : '' ?>">
+                   class="<?= $isPending ? 'date-pending' : '' ?>">
                 <?= $formatter->dateTime($article->available_from) ?>
               </div>
             </td>
@@ -41,21 +49,21 @@ use App\Models\Article;
               <?= $formatter->dateTime($article->created_at) ?>
             </td>
             <td class="text-center" title="">
-              <div class="<?= $article->isEdited() ? 'model-edited' : ''?>"
-                   title="<?= $article->isEdited() ? 'Artykuł został edytowany: ' .
-                    $formatter->dateTime($article->updated_at, true) : ''?>">
-                <?= $article->isEdited() ? $formatter->dateTime($article->updated_at) : '-' ?>
+              <div class="<?= $isUpdated ? 'model-edited' : '' ?>"
+                   title="<?= $isUpdated ? 'Artykuł został edytowany: ' .
+                    $formatter->dateTime($article->updated_at, true) : '' ?>">
+                <?= $isUpdated ? $formatter->dateTime($article->updated_at) : '-' ?>
               </div>
             </td>
             <td class="text-center">
               <div data-toggle="status-menu"
-                   class="<?= $article->statusClass() ?> article-status"
+                   class="<?= Helper::statusClass($article->status) ?> article-status"
                    data-content="
-                     <?php if ($article->status == ArticleHelper::PUBLICATED) : ?>
+                     <?php if ($isPublicated) : ?>
                        <a href='<?= URL?>article/changestatus/notpublic/<?= $article->id ?>' class='btn btn-warning change-status-btn' role='button'>Niepubliczny</a>
-                     <?php elseif ($article->status == ArticleHelper::NOT_PUBLICATED) : ?>
+                     <?php elseif ($isNotPublicated) : ?>
                        <a href='<?= URL?>article/changestatus/public/<?= $article->id ?>' class='btn btn-success change-status-btn' role='button'>Publiczny</a>
-                     <?php elseif ($article->status == ArticleHelper::REMOVED || $article->status == ArticleHelper::SKETCH) : ?>
+                     <?php elseif ($isRemoved || $isSketch) : ?>
                        <a href='<?= URL?>article/changestatus/notpublic/<?= $article->id ?>' class='btn btn-warning change-status-btn' role='button'>Niepubliczny</a><br>
                        <a href='<?= URL?>article/changestatus/public/<?= $article->id ?>' class='btn btn-success change-status-btn' role='button'>Publiczny</a>
                      <?php endif; ?>
@@ -71,7 +79,7 @@ use App\Models\Article;
               <a href="#" class="fa-icon">
                 <i class="fa fa-pencil" aria-hidden="true" title="Edytuj"></i>
               </a>
-              <?php if ($article->isRemoved() || $article->status == ArticleHelper::SKETCH) : ?>
+              <?php if ($isRemoved || $isSketch) : ?>
                 &nbsp;
                 <a id="<?= $article->id ?>"
                    class="show-modal-btn"

@@ -1,7 +1,7 @@
 <?php
 namespace App\Models\Article;
 
-use Libs\Base\TableFiller;
+use Libs\Base\TableFiller\TableFiller;
 use App\Models\{
   Article\Article,
   Category\Category,
@@ -20,30 +20,12 @@ class ArticleTableFiller extends TableFiller
   protected function getSql() : array {
     return [
       'columns' => [
-        Article::tableName() => [  // Base table
-          'id',
-          'title',
-          'content',
-          'slug',
-          'status',
-          'available_from',
-          'created_at',
-          'updated_at'
-        ],
-        Category::tableName() => [
-          'id',
-          'name',
-          'status'
-        ],
-        User::tableName() => [
-          'id',
-          'username',
-          'email',
-          'alias'
-        ]
+        Article::tableName() => Article::getProperties(),  // Base table
+        Category::tableName() => Category::getProperties(),
+        User::tableName() => User::getProperties()
       ],
       'where' => [
-        'status' => [ArticleHelper::PUBLICATED, ArticleHelper::NOT_PUBLICATED],
+        'status' => [ArticleHelper::PUBLICATED, ArticleHelper::NOT_PUBLICATED, ArticleHelper::REMOVED, ArticleHelper::SKETCH],
         'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
       ],
       'sort' => [

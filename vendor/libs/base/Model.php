@@ -27,6 +27,15 @@ abstract class Model
   abstract public function getForm() : void;
 
   /**
+   * Gets all class properties that represents
+   * all of the related table's columns
+   */
+  public static function getProperties() : array {
+    $class = '\\' . get_called_class();
+    return array_keys(get_object_vars(new $class));
+  }
+
+  /**
    * Saveing model in a database
    */
   public function save() : bool {

@@ -17,6 +17,7 @@ use App\Components\Helpers\{
   CategoryHelper,
   ArticleHelper
 };
+use App\Models\User\User;
 
 
 class ArticleController extends Controller
@@ -48,15 +49,9 @@ class ArticleController extends Controller
   public function actionList() {
     AccessControl::onlyForLogged();
     $tableFiller = new ArticleTableFiller();
-    $data = $tableFiller->fetch();
+    $tableRows = $tableFiller->fetch();
 
-    $articles = ArticleQuery::getAll([
-      'sort' => ['available_from', 'DESC'], //and all status
-    ]);
-    return $this->render('article/list', [
-      'articles' => $articles,
-      'data' => $data
-    ]);
+    return $this->render('article/list', ['tableRows' => $tableRows]);
   }
 
   public function actionAdd() {
