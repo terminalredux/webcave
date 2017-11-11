@@ -5,6 +5,7 @@ use Libs\Database\DbConnection;
 
 abstract class TableFiller
 {
+  const WHERE_GROUP_DEFAULT = 'default';
   /**
    * Returns table name
    */
@@ -14,6 +15,12 @@ abstract class TableFiller
    * Returns table relations with other tables
    */
   protected abstract function getRelations() : array;
+
+  /**
+   * Setter & Getter for the whereGroup property
+   */
+  public abstract function setWhereGroup(string $group) : void;
+  public abstract function getWhereGroup() : string;
 
   /**
    * Gets SQL params like: columns
@@ -103,12 +110,31 @@ abstract class TableFiller
   }
 
   /**
+   * TODO if groug from controller param (url) doesnt't exists?
+   * Choose where group from concrete TableFiller that depends
+   * on user's settings. If user doesn't privide any group
+   * method choose a default one in this case it is first element of
+   * array
+   */
+  private function chooseWhereGroup() : array {
+    $whereGroup = $this->getWhereGroup();
+    if ($whereGroup == self::WHERE_GROUP_DEFAULT) {
+      $whereArray = reset($this->getSql()['where']);
+    } else {
+      $whereArray = $this->getSql()['where'][$whereGroup];
+    }
+    return $whereArray;
+  }
+
+  /**
    * Sets WHERE
    */
   private function addWhere() : string {
     $sql = '';
     $firstWhere = true;
-    foreach ($this->getSql()['where'] as $column => $values) {
+    $whereGroup = $this->chooseWhereGroup();
+
+    foreach ($whereGroup as $column => $values) {
       if (!strpos($column, '.')) {
         $column = $this->getTableName() . '.' . $column;
       }

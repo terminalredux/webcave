@@ -15,6 +15,11 @@ use App\Components\Helpers\{
 class ArticleTableFiller extends TableFiller
 {
   /**
+   * Determinate which 'where group' to execute
+   */
+  private $whereGroup = self::WHERE_GROUP_DEFAULT;
+
+  /**
    * @inheritdoc
    */
   protected function getSql() : array {
@@ -25,8 +30,26 @@ class ArticleTableFiller extends TableFiller
         User::tableName() => User::getProperties()
       ],
       'where' => [
-        'status' => [ArticleHelper::PUBLICATED, ArticleHelper::NOT_PUBLICATED, ArticleHelper::REMOVED, ArticleHelper::SKETCH],
-        'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        'active' => [
+          'status' => [ArticleHelper::PUBLICATED, ArticleHelper::NOT_PUBLICATED],
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        ],
+        'removed' => [
+          'status' => [ArticleHelper::REMOVED],
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        ],
+        'sketch' => [
+          'status' => [ArticleHelper::SKETCH],
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        ],
+        'publicated' => [
+          'status' => [ArticleHelper::PUBLICATED],
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        ],
+        'notpublicated' => [
+          'status' => [ArticleHelper::NOT_PUBLICATED],
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+        ],
       ],
       'sort' => [
         'category.name' => 'ASC',
@@ -47,5 +70,19 @@ class ArticleTableFiller extends TableFiller
    */
   protected function getRelations() : array {
     return Article::relations();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function setWhereGroup(string $group) : void {
+    $this->whereGroup = $group;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function getWhereGroup() : string {
+    return $this->whereGroup;
   }
 }

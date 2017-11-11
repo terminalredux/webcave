@@ -49,6 +49,8 @@ class ArticleController extends Controller
   public function actionList() {
     AccessControl::onlyForLogged();
     $tableFiller = new ArticleTableFiller();
+    $tableFiller->setWhereGroup('default');
+
     $tableRows = $tableFiller->fetch();
 
     return $this->render('article/list', ['tableRows' => $tableRows]);
