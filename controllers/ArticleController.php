@@ -107,7 +107,7 @@ class ArticleController extends Controller
       } else {
         $this->error("Wystąpił błąd podczas dodawania artykułu \"$article->title\" do bazy danych!");
       }
-      return $this->executeAction('article/list');
+      return $this->executeAction('article/list/' . $article->routeParam());
     }
     return $this->render('article/form', [
       'categories' => $categories,
@@ -142,10 +142,11 @@ class ArticleController extends Controller
       } else {
         $this->error("Błąd podczas trwałego usuwania artykułu ($article->title)!");
       }
+      return $this->executeAction('article/list/' . $article->routeRemoveParam());
     } else {
       $this->error("Artykuł o ID: $id nie istnieje!");
     }
-    return $this->executeAction('article/list/removed');
+    return $this->executeAction('article/list');
   }
 
 }

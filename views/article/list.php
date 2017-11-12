@@ -41,7 +41,7 @@ use App\Models\Article;
             <td class="text-center">
               <div title="<?= $formatter->dateTime($article->available_from, true) ?>"
                    class="<?= $isPending ? 'date-pending' : '' ?>">
-                <?= $formatter->dateTime($article->available_from) ?>
+                <?= $isSketch ? '-' : $formatter->dateTime($article->available_from) ?>
               </div>
             </td>
             <td title="<?= $formatter->dateTime($article->created_at, true) ?>">

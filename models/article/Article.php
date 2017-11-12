@@ -86,8 +86,10 @@ class Article extends Model
     return $pending;
   }
 
-  private function getAvailableFrom() : int {
-    if (empty($_POST['available_from'])) {
+  private function getAvailableFrom() : ? int {
+    if (isset($_POST['is_sketch']) ) {
+      $result = 0;
+    } elseif (empty($_POST['available_from'])) {
       $result = time();
     } else {
       $result = strtotime($_POST['available_from']);
@@ -233,6 +235,15 @@ class Article extends Model
       $routeParam = 'removed';
     } elseif ($this->status == ArticleHelper::SKETCH) {
       $routeParam = 'sketch';
+    }
+    return $routeParam;
+  }
+
+  public function routeRemoveParam() : string {
+    if ($this->status == ArticleHelper::SKETCH) {
+      $routeParam = 'sketch';
+    } else {
+      $routeParam = 'removed';
     }
     return $routeParam;
   }

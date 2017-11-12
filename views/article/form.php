@@ -41,7 +41,7 @@ if ($editMode) {
       </div>
     </div>
   </div>
-  <div class="row">
+  <div class="row" id="available-form-row">
     <div class="col-md-3" style="padding-left: 0">
       <button class="btn btn-info" id="btn-set-pub-date" style="width: 100%">Ustaw date publikacji</button>
     </div>
@@ -87,6 +87,14 @@ $(function() { $('textarea').froalaEditor({
 </script>
 <script>
 $('document').ready(function(){
+  //available-form-row
+  //var isSketch = $('input[name=is_sketch]:checked');
+  $('#is_sketch').val($(this).is(':checked'));
+
+    $('#is_sketch').change(function() {
+        $('#available-form-row').fadeToggle();
+    });
+
 
   $('#setting-pub-date').hide();
   $("#btn-set-pub-date").click(function( event ) {
