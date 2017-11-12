@@ -88,8 +88,12 @@ class ArticleTableFiller extends TableFiller
   /**
    * @inheritdoc
    */
-  public function setWhereGroup(string $group) : void {
-    $this->whereGroup = $group;
+  public function setWhereGroup(string $group) : bool {
+    if (array_key_exists($group, $this->getSql()['where']) || $group == self::WHERE_GROUP_DEFAULT) {
+      $this->whereGroup = $group;
+      return true;
+    }
+    return false;
   }
 
   /**

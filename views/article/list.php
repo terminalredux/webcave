@@ -8,7 +8,6 @@ use App\Models\Article;
 ?>
 
 <h1>Artykuły</h1>
-<small>Sortowanie według ustalonej daty publikacji (malejąco)</small>
 <br></br>
 <div class="row">
   <div class="col-md-12">
@@ -76,7 +75,7 @@ use App\Models\Article;
                 <i class="fa fa-eye" aria-hidden="true" title="Podgląd"></i>
               </a>
               &nbsp;
-              <a href="#" class="fa-icon">
+              <a href="<?= URL ?>article/edit/<?= $article->id ?>" class="fa-icon">
                 <i class="fa fa-pencil" aria-hidden="true" title="Edytuj"></i>
               </a>
               <?php if ($isRemoved || $isSketch) : ?>
@@ -100,6 +99,11 @@ use App\Models\Article;
         <?php endforeach; ?>
       </tbody>
     </table>
+    <?php if (empty($tableRows)):  ?>
+      <div class="row text-center">
+        <h4>Brak danych</h4>
+      </div>
+    <?php endif; ?>
   </div>
 </div>
 <!-- Modal -->

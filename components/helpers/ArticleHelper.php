@@ -25,6 +25,4 @@ class ArticleHelper
       4 => 'Szkic'
     ];
   }
-
-
 }

@@ -11,7 +11,7 @@ class ErrorController extends Controller
     parent::__construct();
   }
 
-  public function pageNotFound($errorMessage) {
+  public function pageNotFound(string $errorMessage = 'Strona nie istnieje') {
     $this->view->errorMessage = $errorMessage;
     $this->view->render('error/page_not_found');
   }

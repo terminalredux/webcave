@@ -212,5 +212,30 @@ class Article extends Model
     return $slug;
   }
 
+  /**
+   * Load data from post response when you
+   * edit whole article. Doesnt change the status
+   */
+  public function edit() : void {
+    $this->title = $_POST['title'];
+    $this->content = $_POST['content'];
+    $this->category_id = $_POST['category_id'];
+    $this->available_from = $this->getAvailableFrom();
+  }
+
+  public function routeParam() : string {
+    $routeParam = '';
+    if ($this->status == ArticleHelper::PUBLICATED) {
+      $routeParam = 'publicated';
+    } elseif ($this->status == ArticleHelper::NOT_PUBLICATED) {
+      $routeParam = 'notpublicated';
+    } elseif ($this->status == ArticleHelper::REMOVED) {
+      $routeParam = 'removed';
+    } elseif ($this->status == ArticleHelper::SKETCH) {
+      $routeParam = 'sketch';
+    }
+    return $routeParam;
+  }
+
 
 }

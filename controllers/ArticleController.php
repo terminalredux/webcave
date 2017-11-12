@@ -50,14 +50,48 @@ class ArticleController extends Controller
    * @param string $status represent with articles choose, status names
    * are strictly binded with TableFiller where group names
    */
-  public function actionList(string $status = 'default') {
+  public function actionList(string $status = 'active') {
     AccessControl::onlyForLogged();
     $tableFiller = new ArticleTableFiller();
-    $tableFiller->setWhereGroup($status);
+
+    if (!$tableFiller->setWhereGroup($status)) {
+      return (new ErrorController)->pageNotFound();
+    }
     $tableFiller->setSortGroup('byAvailableFrom');
     $tableRows = $tableFiller->fetch();
-    
+
     return $this->render('article/list', ['tableRows' => $tableRows]);
+  }
+
+  public function actionEdit(int $id = null) {
+    AccessControl::onlyForLogged();
+    $this->checkParams(compact('id'), 'article/list');
+    $article = ArticleQuery::getById($id);
+
+    if ($article) {
+      if ($this->isPost()) {
+        $article->edit();
+        $changeUpdateAt = $article->status == ArticleHelper::SKETCH ? false : true;
+        if ($article->update($changeUpdateAt)) {
+          $this->success("Pomyślnie edytowano artykuł pt. \"$article->title\"");
+        } else {
+          $this->error("Błąd podczas edycji artykułu pt. \"$article->title\"");
+        }
+        return $this->executeAction('article/list/' . $article->routeParam());
+      }
+      $categories = CategoryQuery::getAll([
+          'sort' => ['name', 'ASC'],
+          'status' => [CategoryHelper::STATUS_ACTIVE]
+      ]);
+    } else {
+      $this->error("Arykuł który chcesz edytować - o zadanym ID: $id - nie istnieje!");
+      return $this->executeAction('article/list');
+    }
+    return $this->render('article/form', [
+      'categories' => $categories,
+      'article' => $article,
+      'editMode' => true
+    ]);
   }
 
   public function actionAdd() {
@@ -75,8 +109,10 @@ class ArticleController extends Controller
       }
       return $this->executeAction('article/list');
     }
-
-    return $this->render('article/add', ['categories' => $categories]);
+    return $this->render('article/form', [
+      'categories' => $categories,
+      'editMode' => false
+    ]);
   }
 
   public function actionChangeStatus(string $status = null, int $id = null) {
@@ -109,7 +145,7 @@ class ArticleController extends Controller
     } else {
       $this->error("Artykuł o ID: $id nie istnieje!");
     }
-    return $this->executeAction('article/list');
+    return $this->executeAction('article/list/removed');
   }
 
 }

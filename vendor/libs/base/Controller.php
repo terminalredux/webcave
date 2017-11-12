@@ -116,7 +116,7 @@ class Controller
     foreach ($params as $key => $value) {
       if (!$value) {
         $success = false;
-        $message .= "$key: pusta wartość<br> ";
+        $message .= "$key: brak wartość<br> ";
       }
     }
     if (!$success) {

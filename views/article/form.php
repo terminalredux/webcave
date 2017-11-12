@@ -1,17 +1,24 @@
-
-
-
-<form action="<?= URL ?>article/add" method="post" id="articleForm">
-  <h1>Dodaj artykuł</h1>
-  <div class="row text-right">
-    <div class="checkbox">
-      <label for="is_sketch"><input type="checkbox" value="1" name="is_sketch" id="is_sketch">Zapisz jako szkic</label>
+<?php
+if ($editMode) {
+  $action = "article/edit/$article->id";
+} else {
+  $action = "article/add";
+}
+?>
+<form action="<?= URL . $action ?>" method="post" id="articleForm">
+  <h1><?= $editMode ? 'Edycja artykułu' : 'Dodaj artykuł' ?></h1>
+  <br>
+  <?php if (!$editMode) :?>
+    <div class="row text-right">
+      <div class="checkbox">
+        <label for="is_sketch"><input type="checkbox" value="1" name="is_sketch" id="is_sketch">Zapisz jako szkic</label>
+      </div>
     </div>
-  </div>
+  <?php endif; ?>
   <div class="row">
     <div class="form-group">
       <label for="title">Tytuł</label>
-      <input type="text" name="title" id="title" class="form-control">
+      <input type="text" name="title" id="title" class="form-control" value="<?= $editMode ? $article->title : '' ?>">
     </div>
   </div>
   <div class="row">
@@ -19,9 +26,16 @@
       <div class="form-group">
         <label for="category_id">Kategoria</label>
         <select class="form-control" id="category_id" name="category_id">
-          <option disabled selected value>Wybierz kategorie</option>
+          <?php if (!$editMode) : ?>
+            <option disabled selected value>Wybierz kategorie</option>
+          <?php endif; ?>
           <?php foreach ($categories as $category) : ?>
-            <option value="<?= $category->id ?>"><?= $category->name ?></option>
+            <?php if ($editMode && $category->id == $article->category_id) : ?>
+              <option value="<?= $category->id ?>" selected="selected"><?= $category->name ?></option>
+            <?php else : ?>
+              <option value="<?= $category->id ?>"><?= $category->name ?></option>
+            <?php endif; ?>
+
           <?php endforeach; ?>
         </select>
       </div>
@@ -39,6 +53,7 @@
                      name="available_from"
                      id="available_from"
                      class="form-control"
+                     value="<?= $editMode ? date('d-m-Y H:i', $article->available_from) : '' ?>"
                      placeholder="Zmieniona data dodania wpisu">
               <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
@@ -52,11 +67,11 @@
   <div class="row">
     <div class="form-group">
       <label for="content">Treść</label>
-      <textarea id="content" name="content" class="form-control"></textarea>
+      <textarea id="content" name="content" class="form-control"><?= $editMode ? $article->content : '' ?></textarea>
     </div>
   </div>
-  <div class="row">
-    <button type="submit" class="btn btn-success">Dodaj</button>
+  <div class="row" style="margin-bottom: 30px;">
+    <button type="submit" class="btn btn-success"><?= $editMode ? 'Edytuj' : 'Dodaj' ?></button>
   </div>
 </form>
 
@@ -98,9 +113,6 @@ $('document').ready(function(){
       category_id: {
         required: true,
         digits: true
-      },
-      available_from: {
-        date: true
       }
     }
   });

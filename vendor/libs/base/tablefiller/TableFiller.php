@@ -20,7 +20,7 @@ abstract class TableFiller
   /**
    * Setter & Getter for the whereGroup property
    */
-  public abstract function setWhereGroup(string $group) : void;
+  public abstract function setWhereGroup(string $group) : bool;
   public abstract function getWhereGroup() : string;
 
   /**
@@ -123,7 +123,7 @@ abstract class TableFiller
    * array. If where group doesnt exists, returns default group (first element)
    */
   private function chooseWhereGroup() : array {
-    
+
     $whereGroup = $this->getWhereGroup();
     $groupExists = array_key_exists($whereGroup, $this->getSql()['where']);
 
