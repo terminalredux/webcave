@@ -46,13 +46,17 @@ class ArticleController extends Controller
     }
   }
 
-  public function actionList() {
+  /**
+   * @param string $status represent with articles choose, status names
+   * are strictly binded with TableFiller where group names
+   */
+  public function actionList(string $status = 'default') {
     AccessControl::onlyForLogged();
     $tableFiller = new ArticleTableFiller();
-    $tableFiller->setWhereGroup('default');
-
+    $tableFiller->setWhereGroup($status);
+    $tableFiller->setSortGroup('byAvailableFrom');
     $tableRows = $tableFiller->fetch();
-
+    
     return $this->render('article/list', ['tableRows' => $tableRows]);
   }
 

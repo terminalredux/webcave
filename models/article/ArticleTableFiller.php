@@ -20,6 +20,11 @@ class ArticleTableFiller extends TableFiller
   private $whereGroup = self::WHERE_GROUP_DEFAULT;
 
   /**
+   * Determinate which 'sort group' to execute
+   */
+  private $sortGroup = self::SORT_GROUP_DEFAULT;
+
+  /**
    * @inheritdoc
    */
   protected function getSql() : array {
@@ -52,8 +57,16 @@ class ArticleTableFiller extends TableFiller
         ],
       ],
       'sort' => [
-        'category.name' => 'ASC',
-        'title' => 'ASC'
+        'byCategoryName' => [
+          'category.name' => 'ASC',
+          'title' => 'ASC'
+        ],
+        'byAvailableFrom' => [
+          'available_from' => 'DESC'
+        ],
+        'theOldest' => [
+          'created_at' => 'DESC'
+        ]
       ]
     ];
   }
@@ -84,5 +97,19 @@ class ArticleTableFiller extends TableFiller
    */
   public function getWhereGroup() : string {
     return $this->whereGroup;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function setSortGroup(string $group) : void {
+    $this->sortGroup = $group;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  public function getSortGroup() : string {
+    return $this->sortGroup;
   }
 }

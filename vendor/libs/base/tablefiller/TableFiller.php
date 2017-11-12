@@ -6,6 +6,7 @@ use Libs\Database\DbConnection;
 abstract class TableFiller
 {
   const WHERE_GROUP_DEFAULT = 'default';
+  const SORT_GROUP_DEFAULT = 'default';
   /**
    * Returns table name
    */
@@ -21,6 +22,12 @@ abstract class TableFiller
    */
   public abstract function setWhereGroup(string $group) : void;
   public abstract function getWhereGroup() : string;
+
+  /**
+   * Setter & Getter for the sortGroup property
+   */
+  public abstract function setSortGroup(string $group) : void;
+  public abstract function getSortGroup() : string;
 
   /**
    * Gets SQL params like: columns
@@ -110,15 +117,17 @@ abstract class TableFiller
   }
 
   /**
-   * TODO if groug from controller param (url) doesnt't exists?
    * Choose where group from concrete TableFiller that depends
    * on user's settings. If user doesn't privide any group
    * method choose a default one in this case it is first element of
-   * array
+   * array. If where group doesnt exists, returns default group (first element)
    */
   private function chooseWhereGroup() : array {
+    
     $whereGroup = $this->getWhereGroup();
-    if ($whereGroup == self::WHERE_GROUP_DEFAULT) {
+    $groupExists = array_key_exists($whereGroup, $this->getSql()['where']);
+
+    if ($whereGroup == self::WHERE_GROUP_DEFAULT || !$groupExists) {
       $whereArray = reset($this->getSql()['where']);
     } else {
       $whereArray = $this->getSql()['where'][$whereGroup];
@@ -155,11 +164,31 @@ abstract class TableFiller
   }
 
   /**
+   * Choose sort group from concrete TableFiller that depends
+   * on user's settings. If user doesn't privide any group
+   * method choose a default one in this case it is first element of
+   * array. If select group doesnt exists, returns default group (first element)
+   */
+  private function chooseSortGroup() {
+    $sortGroup = $this->getSortGroup();
+    $groupExists = array_key_exists($sortGroup, $this->getSql()['sort']);
+
+    if ($sortGroup == self::SORT_GROUP_DEFAULT || !$groupExists) {
+      $sortArray = reset($this->getSql()['sort']);
+    } else {
+      $sortArray = $this->getSql()['sort'][$sortGroup];
+    }
+    return $sortArray;
+  }
+
+  /**
    * Sets ORDER BY
    */
   private function addOrder() : string {
     $columnsToOrder = [];
-    foreach ($this->getSql()['sort'] as $column => $value) {
+    $sortArray = $this->chooseSortGroup();
+
+    foreach ($sortArray as $column => $value) {
       if (!strpos($column, '.')) {
         $column = $this->getTableName() . '.' . $column;
       }
