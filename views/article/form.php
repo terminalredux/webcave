@@ -1,4 +1,6 @@
 <?php
+use App\Components\Helpers\ArticleHelper;
+
 if ($editMode) {
   $action = "article/edit/$article->id";
 } else {
@@ -41,28 +43,31 @@ if ($editMode) {
       </div>
     </div>
   </div>
-  <div class="row" id="available-form-row">
-    <div class="col-md-3" style="padding-left: 0">
-      <button class="btn btn-info" id="btn-set-pub-date" style="width: 100%">Ustaw date publikacji</button>
-    </div>
-    <div class="col-md-3">
-      <div id="setting-pub-date">
-        <div class="form-group" style="margin-bottom: 0;">
-          <div class='input-group date' id='available-from-datetimepicker'>
-              <input type="text"
-                     name="available_from"
-                     id="available_from"
-                     class="form-control"
-                     value="<?= $editMode ? date('d-m-Y H:i', $article->available_from) : '' ?>"
-                     placeholder="Zmieniona data dodania wpisu">
-              <span class="input-group-addon">
-                  <span class="glyphicon glyphicon-calendar"></span>
-              </span>
+    <?php if ($editMode && $article->status == ArticleHelper::SKETCH) : ?>
+    <?php else: ?>
+      <div class="row" id="available-form-row">
+        <div class="col-md-3" style="padding-left: 0">
+          <button class="btn btn-info" id="btn-set-pub-date" style="width: 100%">Ustaw date publikacji</button>
+        </div>
+        <div class="col-md-3">
+          <div id="setting-pub-date">
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class='input-group date' id='available-from-datetimepicker'>
+                  <input type="text"
+                         name="available_from"
+                         id="available_from"
+                         class="form-control"
+                         value="<?= $editMode ? date('d-m-Y H:i', $article->available_from) : '' ?>"
+                         placeholder="Zmieniona data dodania wpisu">
+                  <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    <?php endif; ?>
   <br>
   <div class="row">
     <div class="form-group">

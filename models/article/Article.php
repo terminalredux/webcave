@@ -148,6 +148,18 @@ class Article extends Model
   }
 
   /**
+   * When occures specific status, sets
+   * current time to created_at field
+   */
+  private function resetTimestampsWhenStatus(int $status) : void {
+    if ($this->status == $status)  {
+      $this->created_at = time();
+      $this->updated_at = time();
+      $this->available_from = time();
+    }
+  }
+
+  /**
    * Changes article status depends on passed param
    * @param string $status
    * @param array $message has two assoc array: content & type
@@ -158,8 +170,10 @@ class Article extends Model
     $availableStatus = true;
 
     if ($status == ArticleHelper::STATUS_PUBLIC) {
+      $this->resetTimestampsWhenStatus(ArticleHelper::SKETCH);
       $this->status = ArticleHelper::PUBLICATED;
     } elseif ($status == ArticleHelper::STATUS_NOT_PUBLIC) {
+      $this->resetTimestampsWhenStatus(ArticleHelper::SKETCH);
       $this->status = ArticleHelper::NOT_PUBLICATED;
     } elseif ($status == ArticleHelper::STATUS_REMOVED) {
       $this->status = ArticleHelper::REMOVED;
