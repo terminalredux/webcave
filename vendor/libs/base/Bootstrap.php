@@ -1,7 +1,6 @@
 <?php
 namespace Libs\Base;
 
-use Libs\Base\ControllerFactory;
 use Libs\Exceptions\MethodNotFoundException;
 use Libs\Session\Session;
 use Libs\FlashMessage\Flash;
@@ -46,7 +45,8 @@ class Bootstrap
     $file = 'controllers/' . $url[0] . 'Controller.php';
 
     if (file_exists($file) && $file != 'controllers/errorController.php') {
-      $controller = ControllerFactory::create($url[0]);
+      $controllerNamespace = '\App\Controllers\\' . ucfirst($url[0]) . 'Controller';
+      $controller = new $controllerNamespace;
       Flash::disableFlash();
       $this->executeAction($url, $controller);
     } else {

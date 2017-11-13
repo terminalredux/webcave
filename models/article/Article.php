@@ -232,7 +232,7 @@ class Article extends Model
    * Load data from post response when you
    * edit whole article. Doesnt change the status
    */
-  public function edit() : void {
+  public function loadEditions() : void {
     $this->title = $_POST['title'];
     $this->content = $_POST['content'];
     $this->category_id = $_POST['category_id'];

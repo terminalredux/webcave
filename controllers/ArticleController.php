@@ -70,7 +70,7 @@ class ArticleController extends Controller
 
     if ($article) {
       if ($this->isPost()) {
-        $article->edit();
+        $article->loadEditions();
         if ($article->update()) {
           $this->success("Pomyślnie edytowano artykuł pt. \"$article->title\"");
         } else {
