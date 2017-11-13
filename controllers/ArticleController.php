@@ -71,8 +71,7 @@ class ArticleController extends Controller
     if ($article) {
       if ($this->isPost()) {
         $article->edit();
-        $changeUpdatedAt = $article->status == ArticleHelper::SKETCH ? false : true;
-        if ($article->update($changeUpdatedAt)) {
+        if ($article->update()) {
           $this->success("Pomyślnie edytowano artykuł pt. \"$article->title\"");
         } else {
           $this->error("Błąd podczas edycji artykułu pt. \"$article->title\"");

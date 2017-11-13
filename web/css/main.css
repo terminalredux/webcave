@@ -98,3 +98,8 @@ a.fa-icon:hover {
   border-radius: 10px;
   color: #fefefe;
 }
+/** for code fragment **/
+pre {
+  border-radius: 0;
+  padding: 3px;
+}

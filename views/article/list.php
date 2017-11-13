@@ -48,7 +48,7 @@ use App\Models\Article;
               <?= $formatter->dateTime($article->created_at) ?>
             </td>
             <td class="text-center" title="">
-              <div class="<?= $isUpdated ? 'model-edited' : '' ?>"
+              <div class="<?= !$isSketch && $isUpdated ? 'model-edited' : '' ?>"
                    title="<?= $isUpdated ? 'Artykuł został edytowany: ' .
                     $formatter->dateTime($article->updated_at, true) : '' ?>">
                 <?= $isUpdated ? $formatter->dateTime($article->updated_at) : '-' ?>

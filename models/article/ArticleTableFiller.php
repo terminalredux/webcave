@@ -37,35 +37,38 @@ class ArticleTableFiller extends TableFiller
       'where' => [
         'active' => [
           'status' => [ArticleHelper::PUBLICATED, ArticleHelper::NOT_PUBLICATED],
-          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN, CategoryHelper::STATUS_REMOVED]
         ],
         'removed' => [
           'status' => [ArticleHelper::REMOVED],
-          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN, CategoryHelper::STATUS_REMOVED]
         ],
         'sketch' => [
           'status' => [ArticleHelper::SKETCH],
-          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN, CategoryHelper::STATUS_REMOVED]
         ],
         'publicated' => [
           'status' => [ArticleHelper::PUBLICATED],
-          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN, CategoryHelper::STATUS_REMOVED]
         ],
         'notpublicated' => [
           'status' => [ArticleHelper::NOT_PUBLICATED],
-          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN]
+          'category.status' => [CategoryHelper::STATUS_ACTIVE, CategoryHelper::STATUS_HIDDEN, CategoryHelper::STATUS_REMOVED]
         ],
       ],
       'sort' => [
+        'byAvailableFrom' => [
+          'available_from' => 'DESC'
+        ],
         'byCategoryName' => [
           'category.name' => 'ASC',
           'title' => 'ASC'
         ],
-        'byAvailableFrom' => [
-          'available_from' => 'DESC'
-        ],
         'theOldest' => [
           'created_at' => 'DESC'
+        ],
+        'lastUpdated' => [
+          'updated_at' => 'DESC'
         ]
       ]
     ];
@@ -91,6 +94,14 @@ class ArticleTableFiller extends TableFiller
   public function setWhereGroup(string $group) : bool {
     if (array_key_exists($group, $this->getSql()['where']) || $group == self::WHERE_GROUP_DEFAULT) {
       $this->whereGroup = $group;
+      switch ($group) {
+        case 'sketch':
+          $this->setSortGroup('lastUpdated');
+          break;
+        case 'active' || 'publicated' || 'notpublicated':
+          $this->setSortGroup('byAvailableFrom');
+          break;
+      }
       return true;
     }
     return false;

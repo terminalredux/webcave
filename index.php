@@ -27,6 +27,10 @@
   <!-- Admin's left menu -->
   <link rel="stylesheet" href="<?= URL ?>web/left-menu/dist/sidebar-menu.css">
   <script src="<?= URL ?>web/left-menu/dist/sidebar-menu.js"></script>
+  <!-- Syntax highlighter: highlightjs -->
+  <link rel="stylesheet" href="<?= URL ?>vendor/bower/highlightjs/styles/dracula.css">
+  <script src="<?= URL ?>vendor/bower/highlightjs/highlight.pack.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
   <!-- Jquery-Validation -->
   <script src="<?= URL ?>vendor/bower/jquery-validation/dist/jquery.validate.min.js"></script>
   <script src="<?= URL ?>web/js/jquery-validate-translations-pl.js"></script>
