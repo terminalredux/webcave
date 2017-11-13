@@ -107,10 +107,14 @@ abstract class TableFiller
     $sql = 'SELECT ' . $selectColumns . ' FROM ' . $this->getTableName();
 
     $relations = $this->getRelations();
+    $relatedTables = [];
+    foreach ($relations as $relation) {
+      $relatedTables[] = $relation['joined-table'];
+    }
 
     foreach ($joinedTables as $table) {
-      if (isset($relations[$table])) {
-        $sql .= ' INNER JOIN ' . $table . ' ON ' . $this->getTableName() . '.' . $relations[$table]['column'] . ' = ' . $table . '.' . $relations[$table]['related_column'];
+      if (in_array($table, $relatedTables)) {
+        $sql .= ' INNER JOIN ' . $table . ' ON ' . $this->getTableName() . '.' . $relations[$table]['foreign-key'] . ' = ' . $table . '.' . $relations[$table]['joined-table-pk'];
       }
     }
     return $sql;

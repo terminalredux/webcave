@@ -42,13 +42,15 @@ class Article extends Model
    */
   public static function relations() : ? array {
      return [
-       Category::tableName() => [
-         'column' => 'category_id',
-         'related_column' => 'id'
+       'category' => [                              // Relation name
+         'foreign-key' => 'category_id',            // column, related_table, related_column
+         'joined-table' => Category::tableName(),
+         'joined-table-pk' => 'id'
        ],
-       User::tableName() => [
-         'column' => 'user_id',
-         'related_column' => 'id'
+       'user' => [
+         'foreign-key' => 'user_id',
+         'joined-table' => User::tableName(),
+         'joined-table-pk' => 'id'
        ]
      ];
    }
