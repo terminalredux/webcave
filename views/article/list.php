@@ -15,10 +15,12 @@ use App\Models\Article;
       <thead>
         <th>Tytuł</th>
         <th>Kategoria</th>
-        <th>Autor</th>
         <th>Data publikacji</th>
         <th>Utworzony</th>
         <th>Zmodyfikowany</th>
+        <th class="text-center">
+          <i class="fa fa-eye" aria-hidden="true" title="Liczba wyświetleń przez gości"></i>
+        </th>
         <th>Status</th>
         <th></th>
       </thead>
@@ -37,7 +39,6 @@ use App\Models\Article;
                 <?= Helper::shortTitle($article->title) ?>
             </td>
             <td><?= $article->category_name ?></td>
-            <td><?= $article->user_username ?></td>
             <td class="text-center">
               <div title="<?= $formatter->dateTime($article->available_from, true) ?>"
                    class="<?= $isPending ? 'date-pending' : '' ?>">
@@ -53,6 +54,9 @@ use App\Models\Article;
                     $formatter->dateTime($article->updated_at, true) : '' ?>">
                 <?= $isUpdated ? $formatter->dateTime($article->updated_at) : '-' ?>
               </div>
+            </td>
+            <td class="text-center" title="Liczba wyświetleń przez gości">
+              <?= !$isSketch ? $article->views : '-' ?>
             </td>
             <td class="text-center">
               <div data-toggle="status-menu"

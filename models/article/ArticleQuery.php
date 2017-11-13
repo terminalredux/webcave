@@ -34,6 +34,7 @@ class ArticleQuery extends Query
     $article->slug = $row['slug'];
     $article->user_id = $row['user_id'];
     $article->content = $row['content'];
+    $article->views = $row['views'];
     $article->available_from = $row['available_from'];
     $article->status = $row['status'];
     $article->created_at = $row['created_at'];

@@ -4,6 +4,7 @@ namespace App\Models\Article;
 use Libs\Database\DbConnection;
 use Libs\Base\Model;
 use Libs\FlashMessage\FlashConf;
+use Libs\AccessControl\AccessControl;
 use App\Components\Helpers\ArticleHelper;
 use App\Models\Category\Category;
 use App\Models\User\User;
@@ -17,6 +18,7 @@ class Article extends Model
   public $title;
   public $slug;
   public $content;
+  public $views;
   public $available_from;
   public $status;
   public $created_at;
@@ -54,6 +56,7 @@ class Article extends Model
     $this->user_id = 1;
     $this->content = $_POST['content'];
     $this->slug = $this->checkSlug($this->createSlug());
+    $this->views = 0;
     $this->available_from = $this->getAvailableFrom();
     $this->status = $this->getStatus();
     $this->created_at = time();
@@ -79,11 +82,10 @@ class Article extends Model
    * in the futrue returns true
    */
   public function isPending() : bool {
-    $pending = false;
     if ($this->available_from > time()) {
-      $pending = true;
+      return true;
     }
-    return $pending;
+    return false;
   }
 
   private function getAvailableFrom() : ? int {
@@ -117,7 +119,7 @@ class Article extends Model
   }
 
   /*
-   * Created for article table, sets
+   * Created for article table, sets css
    * class thats decorated the status info
    */
   public function statusClass() : string {
@@ -131,6 +133,13 @@ class Article extends Model
       $class = 'model-sketch';
     }
     return $class;
+  }
+
+  public function availableForGuest() : bool {
+    if (!$this->isPending() && $this->status == ArticleHelper::PUBLICATED) {
+      return true;
+    }
+    return false;
   }
 
   public function isRemoved() : bool {
@@ -262,5 +271,19 @@ class Article extends Model
     return $routeParam;
   }
 
+  /**
+   * If guest user turns on article view,
+   * method increments views number
+   */
+  public function incrementViewsNumber() : void {
+    if (AccessControl::isGuest()) {
+      $this->views++;
+      //TODO dobrze by było coś zrobić w przypadku
+      //gdy wystąpi błąd podaczas zapisywania zmian
+      //inkrementacji kolumny 'views', na tą chwile nic
+      //nie będzie wiadomo
+      $this->update(false);
+    }
+  }
 
 }

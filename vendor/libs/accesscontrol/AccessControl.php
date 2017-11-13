@@ -24,4 +24,14 @@ class AccessControl
     }
     return false;
   }
+
+  /**
+   * Returns true if user is not logged
+   */
+  public static function isGuest() : bool {
+    if (Session::get('logged')) {
+      return false;
+    }
+    return true;
+  }
 }

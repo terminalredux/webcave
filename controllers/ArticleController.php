@@ -35,15 +35,18 @@ class ArticleController extends Controller
   }
 
   public function actionView(string $slug = null) {
-    AccessControl::onlyForLogged();
     $this->checkParams(compact('slug'), 'article/list');
     $article = ArticleQuery::getBySlug($slug);
     if ($article) {
-      return $this->render('article/article', ['article' => $article]);
-    } else {
-      return (new ErrorController)->pageNotFound("Pod adresem: <strong>" .
-      URL . "article/view/$slug</strong><br>Nie znaleziono takiego artykułu!");
+      if (AccessControl::isGuest() && $article->availableForGuest()) {
+        $article->incrementViewsNumber();
+        return $this->render('article/article', ['article' => $article]);
+      } elseif (AccessControl::logged()) {
+        return $this->render('article/article', ['article' => $article]);
+      }
     }
+    return (new ErrorController)->pageNotFound("Pod adresem: <strong>" .
+    URL . "article/view/$slug</strong><br>Nie znaleziono takiego artykułu!");
   }
 
   /**
