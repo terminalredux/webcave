@@ -1,9 +1,9 @@
 <?php
 use App\Components\Helpers\{
+  CategoryHelper,
   ArticleHelper,
   ArticleTableHelper as Helper
 };
-use App\Models\Category\CategoryQuery;
 use App\Models\Article;
 ?>
 
@@ -38,7 +38,11 @@ use App\Models\Article;
             <td title="<?= $article->title ?>">
                 <?= Helper::shortTitle($article->title) ?>
             </td>
-            <td><?= $article->category_name ?></td>
+            <td class="text-center">
+              <div class="<?= CategoryHelper::bgColor()[$article->category_status] ?>">
+                <?= $article->category_name ?>
+              </div>
+            </td>
             <td class="text-center">
               <div title="<?= $formatter->dateTime($article->available_from, true) ?>"
                    class="<?= $isPending ? 'date-pending' : '' ?>">

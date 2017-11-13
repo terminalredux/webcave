@@ -5,8 +5,14 @@ use Libs\Database\DbConnection;
 use Libs\Base\Model;
 use Libs\FlashMessage\FlashConf;
 use Libs\AccessControl\AccessControl;
-use App\Components\Helpers\ArticleHelper;
-use App\Models\Category\Category;
+use App\Components\Helpers\{
+  ArticleHelper,
+  CategoryHelper
+};
+use App\Models\Category\{
+  Category,
+  CategoryQuery
+};
 use App\Models\User\User;
 use DateTime;
 
@@ -137,7 +143,10 @@ class Article extends Model
 
   public function availableForGuest() : bool {
     if (!$this->isPending() && $this->status == ArticleHelper::PUBLICATED) {
-      return true;
+      $category = CategoryQuery::getById($this->category_id);
+      if ($category && $category->status == CategoryHelper::STATUS_ACTIVE) {
+        return true;
+      }
     }
     return false;
   }
