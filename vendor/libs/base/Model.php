@@ -11,6 +11,22 @@ use PDO;
  */
 abstract class Model
 {
+  public function __construct() {
+    $this->initRelatedModels();
+  }
+
+  private function initRelatedModels() : void {
+    $relations = static::relations();
+
+    for ($i = 1; $i <= count($relations); $i++) {
+      $propertyName = key($relations);
+      $modelNamespace = '\\' . current($relations)['model'];
+      $this->$propertyName = new $modelNamespace;
+      next($relations);
+    }
+    //TODO to finish!!!! getbyId
+  }
+
   /**
    * Returns table name binded with model
    */
@@ -28,11 +44,28 @@ abstract class Model
 
   /**
    * Gets all class properties that represents
-   * all of the related table's columns
+   * all of the related table's columns. Remove properties for
+   * the models in relations. Returns only properties that represent base
+   * table columns.
    */
   public static function getProperties() : array {
     $class = '\\' . get_called_class();
-    return array_keys(get_object_vars(new $class));
+    $relations = static::relations();
+    if ($relations) {
+      $relationProperties = array_keys(static::relations());
+      $allProperties = array_keys(get_object_vars(new $class));
+      $baseTableProperties = array_diff($allProperties, $relationProperties);
+    } else {
+      $baseTableProperties = array_keys(get_object_vars(new $class));
+    }
+    return $baseTableProperties;
+  }
+
+  /**
+   * Gets full name of the concrette model with namespace
+   */
+  public static function className() : string {
+    return get_called_class();
   }
 
   /**

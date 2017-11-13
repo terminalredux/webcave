@@ -3,6 +3,6 @@
 <?= $article->content ?>
 <br>
 <br>
-<?= $article->user_id ?>
+<?= var_dump($article->category->id);die; ?>
 <br>
 <br>

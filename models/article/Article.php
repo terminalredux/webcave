@@ -9,11 +9,11 @@ use App\Components\Helpers\{
   ArticleHelper,
   CategoryHelper
 };
-use App\Models\Category\{
-  Category,
-  CategoryQuery
+use App\Models\{
+  Category\Category,
+  Category\CategoryQuery,
+  User\User
 };
-use App\Models\User\User;
 use DateTime;
 
 class Article extends Model
@@ -45,12 +45,14 @@ class Article extends Model
        'category' => [                              // Relation name
          'foreign-key' => 'category_id',            // column, related_table, related_column
          'joined-table' => Category::tableName(),
-         'joined-table-pk' => 'id'
+         'joined-table-pk' => 'id',
+         'model' => Category::className()
        ],
        'user' => [
          'foreign-key' => 'user_id',
          'joined-table' => User::tableName(),
-         'joined-table-pk' => 'id'
+         'joined-table-pk' => 'id',
+         'model' => User::className()
        ]
      ];
    }
