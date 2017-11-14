@@ -9,9 +9,10 @@ use App\Models\Article\{
   ArticleQuery,
   Article
 };
-use App\Models\Category\{
-    CategoryQuery,
-    Category
+use App\Models\{
+    Category\CategoryQuery,
+    Category\Category,
+    Comment\Comment
 };
 use App\Components\Helpers\{
   CategoryHelper,
@@ -39,6 +40,16 @@ class ArticleController extends Controller
     $article = Article::getBySlug($slug);
 
     if ($article) {
+      if ($this->isPost()) {
+        $comment = new Comment();
+        $comment->article_id = $article->id;
+        if ($article->availableForGuest() && $comment->save()) {
+          $this->success("Komentarz czeka na zatwierdzenie!");
+        } else {
+          $this->error("Błąd podczas dodawania komentarza!");
+        }
+        return $this->executeAction('article/view/' . $slug);
+      }
       if (AccessControl::isGuest() && $article->availableForGuest()) {
         $article->incrementViewsNumber();
         return $this->render('article/article', ['article' => $article]);
@@ -52,7 +63,7 @@ class ArticleController extends Controller
 
   /**
    * @param string $status represent with articles choose, status names
-   * are strictly binded with TableFiller where group names
+   * are strictly binded with TableFiller's 'where group' names
    */
   public function actionList(string $status = 'active') {
     AccessControl::onlyForLogged();

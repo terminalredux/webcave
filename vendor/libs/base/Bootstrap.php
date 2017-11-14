@@ -12,6 +12,9 @@ use App\Controllers\ErrorController;
  */
 class Bootstrap
 {
+  /**
+   * singleton design pattern
+   */
   private static $instance = false;
 
   /**
@@ -48,7 +51,7 @@ class Bootstrap
       $controllerNamespace = '\App\Controllers\\' . ucfirst($url[0]) . 'Controller';
       $controller = new $controllerNamespace;
       Flash::disableFlash();
-      $this->executeAction($url, $controller);
+      $this->executeRoute($url, $controller);
     } else {
       (new ErrorController)->pageNotFound("<strong style='font-size: 1.2em'>" . $url[0] . "Controller</strong> doesn't exists!");
       return false;
@@ -89,6 +92,17 @@ class Bootstrap
   }
 
   /**
+   * Returns param from the current url
+   */
+  public function getParam() : ? string {
+    $url = $this->getUrl();
+    if (isset($url[2])) {
+      return $url[2];
+    }
+    return null;
+  }
+
+  /**
    * @return array $url
    */
   private function getUrl() : array {
@@ -108,7 +122,7 @@ class Bootstrap
    * @param Controller $controller
    * @return void
    */
-  private function executeAction($url, $controller) {
+  private function executeRoute($url, $controller) {
     try {
       if (!isset($url[1])) {
         $controller->{DEFAULT_ACTION_INDEX}();  // sets default action to index

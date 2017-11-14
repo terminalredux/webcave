@@ -3,6 +3,9 @@ namespace App\Controllers;
 
 use Libs\Base\Controller;
 use Libs\AccessControl\AccessControl;
+use App\Models\{
+  Comment\Comment
+};
 
 class CommentController extends Controller
 {
@@ -17,8 +20,4 @@ class CommentController extends Controller
     return (new \App\Controllers\ErrorController)->pageNotFound();
   }
 
-  public function actionAdd() {
-    
-
-  }
 }

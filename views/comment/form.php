@@ -1,7 +1,11 @@
+<?php
+use Libs\Base\Bootstrap;
+$app = Bootstrap::getInstance();
+?>
 <h4>Dodaj komentarz</h4>
 <div class="row">
   <div class="col-md-6">
-  <form action="<?= URL ?>comment/add" method="POST" id="commenteForm">
+  <form action="<?= URL ?>article/view/<?= $app->getParam() ?>" method="POST" id="commentForm">
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -34,3 +38,25 @@
   <div class="col-md-6">
   </div>
 </div>
+<script>
+$('document').ready(function(){
+
+
+  $('#commentForm').validate({
+    rules: {
+      nick: {
+        required: true,
+        minlength: 2,
+        maxlength: 50
+      },
+      content: {
+        required: true
+      },
+      email: {
+        email: true
+      }
+    }
+  });
+
+});
+</script>

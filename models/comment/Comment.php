@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Category;
+namespace App\Models\Comment;
 
 use Libs\Base\Model;
 
@@ -19,6 +19,7 @@ class Comment extends Model
   const NOT_PUBLICATED = 1;
   const PUBLICATED = 2;
   const REMOVED = 3;
+  const ADMIN = 4;
 
   /**
    * @inheritdoc

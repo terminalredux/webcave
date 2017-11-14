@@ -152,7 +152,7 @@ class Article extends Model
 
   public function availableForGuest() : bool {
     if (!$this->isPending() && $this->status == ArticleHelper::PUBLICATED) {
-      $category = CategoryQuery::getById($this->category_id);
+      $category = Category::getById($this->category_id);
       if ($category && $category->status == CategoryHelper::STATUS_ACTIVE) {
         return true;
       }
@@ -169,6 +169,13 @@ class Article extends Model
 
   public function isEdited() : bool {
     if ($this->created_at < $this->updated_at) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isPublicated() : bool {
+    if ($this->status == ArticleHelper::PUBLICATED) {
       return true;
     }
     return false;
