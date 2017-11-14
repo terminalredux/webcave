@@ -29,6 +29,10 @@ class Controller
     return !empty($_POST);
   }
 
+  public function clearPost() : void {
+    $_POST = array();
+  }
+
   /**
    * Check if there is a post request
    */

@@ -2,7 +2,7 @@
 namespace App\Models\Comment;
 
 use Libs\Base\Model;
-
+use App\Models\Article\Article;
 
 class Comment extends Model
 {
@@ -32,7 +32,13 @@ class Comment extends Model
    * @inheritdoc
    */
   public static function relations() : ? array {
-    return null;
+    return [
+      'article' => [                        // Relation name
+        'foreign-key' => 'article_id',
+        'joined-table-pk' => 'id',
+        'model' => Article::className()
+      ]
+    ];
   }
 
   /**
