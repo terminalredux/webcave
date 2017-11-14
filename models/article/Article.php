@@ -44,13 +44,11 @@ class Article extends Model
      return [
        'category' => [                              // Relation name
          'foreign-key' => 'category_id',            // column, related_table, related_column
-         'joined-table' => Category::tableName(),
          'joined-table-pk' => 'id',
          'model' => Category::className()
        ],
        'user' => [
          'foreign-key' => 'user_id',
-         'joined-table' => User::tableName(),
          'joined-table-pk' => 'id',
          'model' => User::className()
        ]

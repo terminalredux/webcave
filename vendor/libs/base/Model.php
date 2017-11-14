@@ -12,7 +12,6 @@ use PDO;
 abstract class Model
 {
   public function __construct() {
-    $this->initRelatedModels();
   }
 
   private function initRelatedModels() : void {
@@ -22,10 +21,93 @@ abstract class Model
       $propertyName = key($relations);
       $modelNamespace = '\\' . current($relations)['model'];
       $this->$propertyName = new $modelNamespace;
+
+      $fk_key = current($relations)['foreign-key'];
+      var_dump($this);die;
+
+      $this->$propertyName->getById();
       next($relations);
     }
-    //TODO to finish!!!! getbyId
   }
+
+  public static function getBySlug(string $slug) : ? self {
+    $classNamespace = '\\' . get_called_class();
+    $model = new $classNamespace;
+
+    try {
+      $db = new DbConnection();
+      $db = $db->connect();
+      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE slug = :slug");
+      $statement->bindParam(':slug', $slug, PDO::PARAM_STR);
+      $statement->execute();
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+      $db = null;
+      if ($row) {
+        foreach($row as $key => $value) {
+          $model->$key = $value;
+        }
+
+        $relations = static::relations();
+        if ($relations) {
+          $relNames = array_keys($relations);
+          for ($i = 0; $i < count($relations); $i++) {
+            $relConf = $relations[$relNames[$i]];
+            $relPropName = $relNames[$i];
+            $relModel = '\\' . $relConf['model'];
+            $fkColName = $relConf['foreign-key'];
+            $model->$relPropName = $relModel::getById($model->$fkColName);
+          }
+        }
+        return $model;
+      }
+    } catch (PDOException $e) {
+      $e->getMessage();
+    }
+    return null;
+  }
+
+  /**
+   * Finds model in table by ID
+   */
+  public static function getById(int $id) : ? self {
+    $classNamespace = '\\' . get_called_class();
+    $model = new $classNamespace;
+
+    try {
+      $db = new DbConnection();
+      $db = $db->connect();
+      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE id = :id");
+      $statement->bindParam(':id', $id, PDO::PARAM_INT);
+      $statement->execute();
+      $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+      $db = null;
+      if ($row) {
+        foreach($row as $key => $value) {
+          $model->$key = $value;
+        }
+
+        $relations = static::relations();
+        if ($relations) {
+          $relNames = array_keys($relations);
+          for ($i = 0; $i < count($relations); $i++) {
+            $relConf = $relations[$relNames[$i]];
+            $relPropName = $relNames[$i];
+            $relModel = '\\' . $relConf['model'];
+            $fkColName = $relConf['foreign-key'];
+            $model->$relPropName = $relModel::getById($model->$fkColName);
+          }
+        }
+        return $model;
+      }
+    } catch (PDOException $e) {
+      $e->getMessage();
+    }
+    return null;
+  }
+
+
 
   /**
    * Returns table name binded with model
@@ -43,10 +125,10 @@ abstract class Model
   abstract public function getForm() : void;
 
   /**
-   * Gets all class properties that represents
-   * all of the related table's columns. Remove properties for
-   * the models in relations. Returns only properties that represent base
-   * table columns.
+   * Gets class properties that represents all of the
+   * related table's columns. Remove properties for
+   * the models in relations. Returns only properties
+   * that represent base table columns.
    */
   public static function getProperties() : array {
     $class = '\\' . get_called_class();

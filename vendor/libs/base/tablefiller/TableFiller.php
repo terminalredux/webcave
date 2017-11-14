@@ -109,7 +109,8 @@ abstract class TableFiller
     $relations = $this->getRelations();
     $relatedTables = [];
     foreach ($relations as $relation) {
-      $relatedTables[] = $relation['joined-table'];
+      $classNamespace = '\\' . $relation['model'];
+      $relatedTables[] = $classNamespace::tableName();
     }
 
     foreach ($joinedTables as $table) {

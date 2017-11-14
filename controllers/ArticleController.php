@@ -36,7 +36,7 @@ class ArticleController extends Controller
 
   public function actionView(string $slug = null) {
     $this->checkParams(compact('slug'), 'article/list');
-    $article = ArticleQuery::getBySlug($slug);
+    $article = Article::getBySlug($slug);
 
     if ($article) {
       if (AccessControl::isGuest() && $article->availableForGuest()) {
