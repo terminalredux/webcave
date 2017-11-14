@@ -5,4 +5,9 @@
 <br>
 <?= $article->user->alias ?>
 <br>
+<hr>
 <br>
+<?= $this->render('comment/form') ?>
+<br>
+<br>
+<?= $this->render('comment/public-list') ?>
