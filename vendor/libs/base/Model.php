@@ -30,36 +30,39 @@ abstract class Model
     }
   }
 
+  /**
+   * If you want to use method getBySlug you have to override
+   * this method in concrete model and return slug property name
+   */
+  public static function slugProperty() : ? string {
+    return null;
+  }
+
+  /**
+   * Find model by slug column. If you want to use
+   * this method you have to return slug property name
+   * by overriden method slugPoprerty() in concrete model
+   */
   public static function getBySlug(string $slug) : ? self {
     $classNamespace = '\\' . get_called_class();
+    $slugPropertyName = $classNamespace::slugProperty();
+    if (!$slugPropertyName) {
+      return null;
+    }
     $model = new $classNamespace;
-
     try {
       $db = new DbConnection();
       $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE slug = :slug");
-      $statement->bindParam(':slug', $slug, PDO::PARAM_STR);
+      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $slugPropertyName = :slug");
+      $statement->bindParam($slugPropertyName, $slug, PDO::PARAM_STR);
       $statement->execute();
       $row = $statement->fetch(PDO::FETCH_ASSOC);
-
       $db = null;
       if ($row) {
         foreach($row as $key => $value) {
           $model->$key = $value;
         }
-
-        $relations = static::relations();
-        if ($relations) {
-          $relNames = array_keys($relations);
-          for ($i = 0; $i < count($relations); $i++) {
-            $relConf = $relations[$relNames[$i]];
-            $relPropName = $relNames[$i];
-            $relModel = '\\' . $relConf['model'];
-            $fkColName = $relConf['foreign-key'];
-            $model->$relPropName = $relModel::getById($model->$fkColName);
-          }
-        }
-        return $model;
+        return self::createRelationsProperties($model);
       }
     } catch (PDOException $e) {
       $e->getMessage();
@@ -68,17 +71,41 @@ abstract class Model
   }
 
   /**
+   * Method is used in getBy* methods (e.g. getById).
+   * Create related models as a bace model properties
+   * - based on relations settings in concrete model.
+   * E.g. model News has a relation with
+   * Category model: $news->category->id
+   * returns ID of the category object
+   */
+  private static function createRelationsProperties(self $model) : self {
+    $relations = static::relations();
+    if ($relations) {
+      $relNames = array_keys($relations);
+      for ($i = 0; $i < count($relations); $i++) {
+        $relConf = $relations[$relNames[$i]];
+        $relPropName = $relNames[$i];
+        $relModel = '\\' . $relConf['model'];
+        $fkColName = $relConf['foreign-key'];
+        $tablePk = $relConf['joined-table-pk'];
+        $model->$relPropName = $relModel::getById($model->$fkColName, $tablePk);
+      }
+    }
+    return $model;
+  }
+
+  /**
    * Finds model in table by ID
    */
-  public static function getById(int $id) : ? self {
+  public static function getById(int $idValue, string $columnName = 'id') : ? self {
     $classNamespace = '\\' . get_called_class();
     $model = new $classNamespace;
 
     try {
       $db = new DbConnection();
       $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE id = :id");
-      $statement->bindParam(':id', $id, PDO::PARAM_INT);
+      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $columnName = :id");
+      $statement->bindParam(':id', $idValue, PDO::PARAM_INT);
       $statement->execute();
       $row = $statement->fetch(PDO::FETCH_ASSOC);
 
@@ -87,27 +114,13 @@ abstract class Model
         foreach($row as $key => $value) {
           $model->$key = $value;
         }
-
-        $relations = static::relations();
-        if ($relations) {
-          $relNames = array_keys($relations);
-          for ($i = 0; $i < count($relations); $i++) {
-            $relConf = $relations[$relNames[$i]];
-            $relPropName = $relNames[$i];
-            $relModel = '\\' . $relConf['model'];
-            $fkColName = $relConf['foreign-key'];
-            $model->$relPropName = $relModel::getById($model->$fkColName);
-          }
-        }
-        return $model;
+        return self::createRelationsProperties($model);
       }
     } catch (PDOException $e) {
       $e->getMessage();
     }
     return null;
   }
-
-
 
   /**
    * Returns table name binded with model

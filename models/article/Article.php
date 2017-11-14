@@ -58,6 +58,13 @@ class Article extends Model
   /**
    * @inheritdoc
    */
+  public static function slugProperty() : ? string {
+     return 'slug';
+  }
+
+  /**
+   * @inheritdoc
+   */
   public function getForm() : void {
     $this->title = $_POST['title'];
     $this->category_id = $_POST['category_id'];
