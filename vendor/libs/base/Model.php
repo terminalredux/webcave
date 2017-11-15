@@ -14,21 +14,33 @@ abstract class Model
   public function __construct() {
   }
 
-  private function initRelatedModels() : void {
-    $relations = static::relations();
+  /**
+   * Returns table name binded with model
+   */
+  abstract public static function tableName() : string;
 
-    for ($i = 1; $i <= count($relations); $i++) {
-      $propertyName = key($relations);
-      $modelNamespace = '\\' . current($relations)['model'];
-      $this->$propertyName = new $modelNamespace;
+  /**
+   * Returns table relations with other tables
+   * keys of the returned array is relation name eg:
+   * 'user' => [
+   *   'has' => 'one',
+   *   'column' => 'user_id',
+   *   'joined-table-column' => 'id',
+   *   'model' => User::className()
+   *   ],
+   * 'comments' => [
+   *   'has' => 'many',
+   *   'column' => 'id',
+   *   'joined-table-column' => 'article_id',
+   *   'model' => Comment::className()
+   *  ]
+   */
+  abstract public static function relations() : ? array;
 
-      $fk_key = current($relations)['column'];
-      var_dump($this);die;
-
-      $this->$propertyName->getById();
-      next($relations);
-    }
-  }
+  /**
+   * Prepare model properties before save in database
+   */
+  abstract public function getForm() : void;
 
   /**
    * If you want to use method getBySlug you have to override
@@ -70,6 +82,22 @@ abstract class Model
     return null;
   }
 
+  private function initRelatedModels() : void {
+    $relations = static::relations();
+
+    for ($i = 1; $i <= count($relations); $i++) {
+      $propertyName = key($relations);
+      $modelNamespace = '\\' . current($relations)['model'];
+      $this->$propertyName = new $modelNamespace;
+
+      $fk_key = current($relations)['column'];
+      var_dump($this);die;
+
+      $this->$propertyName->getById();
+      next($relations);
+    }
+  }
+
   /**
    * Method is used in getBy* methods (e.g. getById).
    * Create related models as a bace model properties
@@ -80,22 +108,68 @@ abstract class Model
    */
   private static function createRelationsProperties(self $model) : self {
     $relations = static::relations();
+
     if ($relations) {
       $relNames = array_keys($relations);
       for ($i = 0; $i < count($relations); $i++) {
         $relConf = $relations[$relNames[$i]];
         $relPropName = $relNames[$i];
         $relModel = '\\' . $relConf['model'];
-        $fkColName = $relConf['column'];
-        $tablePk = $relConf['joined-table-column'];
-        $model->$relPropName = $relModel::getById($model->$fkColName, $tablePk);
+        $colName = $relConf['column'];
+        $joinedCol = $relConf['joined-table-column'];
+        if ($relConf['has'] == 'one') {
+          $model->$relPropName = $relModel::getById($model->$colName, $joinedCol);
+        } elseif ($relConf['has'] == 'many') {
+          //TODO problemy z rekurencją...
+          $model->$relPropName = $relModel::getAll($model->$colName, $joinedCol);
+        }
       }
     }
     return $model;
   }
 
   /**
+   * Finds all by column. Written for
+   * relation has-many operation.
+   * @param string $columnValue if you want to provide ID you have treat it like a string
+   * @param string $columnName
+   * @return array of Models
+   */
+  public static function getAll(string $columnValue, string $columnName) : ? array {
+    $classNamespace = '\\' . get_called_class();
+
+    try {
+      $db = new DbConnection();
+      $db = $db->connect();
+      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $columnName = :value");
+      $statement->bindParam(':value', $columnValue, PDO::PARAM_STR);
+      $statement->execute();
+      $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+      $db = null;
+      $models = [];
+      if ($rows) {
+        foreach ($rows as $row) {
+          $model = new $classNamespace;
+          foreach ($row as $key => $value) {
+            $model->$key = $value;
+          }
+          $model = self::createRelationsProperties($model);
+          $models[] = $model;
+        }
+        //var_dump($models[1]->nick);die;
+        //return self::createRelationsProperties($model);
+        return $models;
+      }
+    } catch (PDOException $e) {
+      $e->getMessage();
+    }
+    return null;
+  }
+
+  /**
    * Finds model in table by ID
+   * @return Model||null
    */
   public static function getById(int $idValue, string $columnName = 'id') : ? self {
     $classNamespace = '\\' . get_called_class();
@@ -121,34 +195,6 @@ abstract class Model
     }
     return null;
   }
-
-  /**
-   * Returns table name binded with model
-   */
-  abstract public static function tableName() : string;
-
-  /**
-   * Returns table relations with other tables
-   * keys of the returned array is relation name eg:
-   * 'user' => [
-   *   'has' => 'one',
-   *   'column' => 'user_id',
-   *   'joined-table-column' => 'id',
-   *   'model' => User::className()
-   *   ],
-   * 'comments' => [
-   *   'has' => 'many',
-   *   'column' => 'id',
-   *   'joined-table-column' => 'article_id',
-   *   'model' => Comment::className()
-   *  ]
-   */
-  abstract public static function relations() : ? array;
-
-  /**
-   * Prepare model properties before save in database
-   */
-  abstract public function getForm() : void;
 
   /**
    * Gets class properties that represents all of the

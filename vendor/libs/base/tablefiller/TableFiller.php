@@ -39,6 +39,7 @@ abstract class TableFiller
    * Gets rows from table that depends
    * on provided SQL. First table in
    * array columns is the base table
+   * You can only joins table with 'has one' relations! 
    */
   public function fetch() : ? array {
     $sql = $this->prepareSql();
@@ -81,6 +82,7 @@ abstract class TableFiller
   }
 
   /**
+   * You can only joins table with 'has one' relations!
    * Init SQL: add columns and inner joins
    * For the columns from the outside the base table
    * adds aliases depends on thier table name prefix like: "user_id"
@@ -109,8 +111,10 @@ abstract class TableFiller
     $relations = $this->getRelations();
     $relatedTables = [];
     foreach ($relations as $relation) {
-      $classNamespace = '\\' . $relation['model'];
-      $relatedTables[] = $classNamespace::tableName();
+      if ($relation['has'] == 'one') {
+        $classNamespace = '\\' . $relation['model'];
+        $relatedTables[] = $classNamespace::tableName();
+      }
     }
 
     foreach ($joinedTables as $table) {

@@ -74,7 +74,7 @@ class ArticleController extends Controller
     }
     $tableFiller->setSortGroup('byAvailableFrom');
     $tableRows = $tableFiller->fetch();
-
+    
     return $this->render('article/list', ['tableRows' => $tableRows]);
   }
 

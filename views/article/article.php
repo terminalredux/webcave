@@ -3,7 +3,8 @@
 <?= $article->content ?>
 <br>
 <br>
-<?= $article->user->alias ?>
+<?= $article->user->alias ?><br>
+<?= $article->category->name ?><br>
 <br>
 <hr>
 <br>

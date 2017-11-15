@@ -45,7 +45,7 @@ class Article extends Model
        'category' => [    //Relation name
          'has' => 'one',
          'column' => 'category_id',
-         'joined-table-column' => 'id',       
+         'joined-table-column' => 'id',
          'model' => Category::className()
        ],
        'user' => [
@@ -54,12 +54,12 @@ class Article extends Model
          'joined-table-column' => 'id',
          'model' => User::className()
        ],
-       //'comments' => [
-       //  'has' => 'many',
-       //  'column' => 'id',
-       //  'joined-table-column' => 'article_id',
-       //  'model' => \App\Models\Comment\Comment::className()
-       //]
+       'comments' => [
+         'has' => 'many',
+         'column' => 'id',
+         'joined-table-column' => 'article_id',
+         'model' => \App\Models\Comment\Comment::className()
+       ]
      ];
    }
 
