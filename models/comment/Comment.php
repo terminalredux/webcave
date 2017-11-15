@@ -32,13 +32,17 @@ class Comment extends Model
    * @inheritdoc
    */
   public static function relations() : ? array {
+    return null;
+    /*
     return [
       'article' => [                        // Relation name
-        'foreign-key' => 'article_id',
-        'joined-table-pk' => 'id',
+        'has' => 'one',
+        'column' => 'article_id',
+        'joined-table-column' => 'id',
         'model' => Article::className()
       ]
     ];
+    */
   }
 
   /**

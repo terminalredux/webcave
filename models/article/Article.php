@@ -42,16 +42,24 @@ class Article extends Model
    */
   public static function relations() : ? array {
      return [
-       'category' => [                              // Relation name
-         'foreign-key' => 'category_id',            // column, related_table, related_column
-         'joined-table-pk' => 'id',
+       'category' => [    //Relation name
+         'has' => 'one',
+         'column' => 'category_id',
+         'joined-table-column' => 'id',       
          'model' => Category::className()
        ],
        'user' => [
-         'foreign-key' => 'user_id',
-         'joined-table-pk' => 'id',
+         'has' => 'one',
+         'column' => 'user_id',
+         'joined-table-column' => 'id',
          'model' => User::className()
-       ]
+       ],
+       //'comments' => [
+       //  'has' => 'many',
+       //  'column' => 'id',
+       //  'joined-table-column' => 'article_id',
+       //  'model' => \App\Models\Comment\Comment::className()
+       //]
      ];
    }
 

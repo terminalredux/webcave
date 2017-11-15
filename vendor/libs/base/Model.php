@@ -22,7 +22,7 @@ abstract class Model
       $modelNamespace = '\\' . current($relations)['model'];
       $this->$propertyName = new $modelNamespace;
 
-      $fk_key = current($relations)['foreign-key'];
+      $fk_key = current($relations)['column'];
       var_dump($this);die;
 
       $this->$propertyName->getById();
@@ -86,8 +86,8 @@ abstract class Model
         $relConf = $relations[$relNames[$i]];
         $relPropName = $relNames[$i];
         $relModel = '\\' . $relConf['model'];
-        $fkColName = $relConf['foreign-key'];
-        $tablePk = $relConf['joined-table-pk'];
+        $fkColName = $relConf['column'];
+        $tablePk = $relConf['joined-table-column'];
         $model->$relPropName = $relModel::getById($model->$fkColName, $tablePk);
       }
     }
@@ -129,6 +129,19 @@ abstract class Model
 
   /**
    * Returns table relations with other tables
+   * keys of the returned array is relation name eg:
+   * 'user' => [
+   *   'has' => 'one',
+   *   'column' => 'user_id',
+   *   'joined-table-column' => 'id',
+   *   'model' => User::className()
+   *   ],
+   * 'comments' => [
+   *   'has' => 'many',
+   *   'column' => 'id',
+   *   'joined-table-column' => 'article_id',
+   *   'model' => Comment::className()
+   *  ]
    */
   abstract public static function relations() : ? array;
 
