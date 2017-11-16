@@ -2,11 +2,14 @@
 namespace App\Models\Category;
 
 use Libs\Base\Model;
-
+use App\Models\{
+  BaseCategory\BaseCategory
+};
 
 class Category extends Model
 {
   public $id;
+  public $base_category_id;
   public $name;
   public $status;
   public $created_at;
@@ -29,12 +32,13 @@ class Category extends Model
   public static function relations() : ? array {
     return null;
   }
-  
+
   /**
    * @inheritdoc
    */
   public function getForm() : void {
     $this->name = $_POST['name'];
+    $this->base_category_id = 1;
     $this->status = self::STATUS_ACTIVE;
     $this->created_at = time();
     $this->updated_at = time();

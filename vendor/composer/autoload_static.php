@@ -6,6 +6,10 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitf905025f2bcf178b1bdc2d876e971647
 {
+    public static $files = array (
+        '6e60481d8c04e99474e2ba7b3658ab5a' => __DIR__ . '/..' . '/php-activerecord/php-activerecord/ActiveRecord.php',
+    );
+
     public static $prefixLengthsPsr4 = array (
         'L' => 
         array (
@@ -43,45 +47,11 @@ class ComposerStaticInitf905025f2bcf178b1bdc2d876e971647
         ),
     );
 
-    public static $classMap = array (
-        'App\\Components\\DateTimeHelper\\DateTimeHelper' => __DIR__ . '/../..' . '/components/datetimehelper/DateTimeHelper.php',
-        'App\\Components\\OpenWeatherMap\\OpenWeatherMap' => __DIR__ . '/../..' . '/components/openweathermap/OpenWeatherMap.php',
-        'App\\Components\\Parsers\\AbstractDetailsParser' => __DIR__ . '/../..' . '/components/parsers/AbstractDetailsParser.php',
-        'App\\Components\\Parsers\\AbstractListParser' => __DIR__ . '/../..' . '/components/parsers/AbstractListParser.php',
-        'App\\Components\\Parsers\\Jelonka\\DetailsParserJelonka' => __DIR__ . '/../..' . '/components/parsers/jelonka/DetailsParserJelonka.php',
-        'App\\Components\\Parsers\\Jelonka\\ListParserJelonka' => __DIR__ . '/../..' . '/components/parsers/jelonka/ListParserJelonka.php',
-        'App\\Components\\Parsers\\Jg24\\DetailsParserJG24' => __DIR__ . '/../..' . '/components/parsers/jg24/DetailsParserJG24.php',
-        'App\\Components\\Parsers\\Jg24\\ListParserJG24' => __DIR__ . '/../..' . '/components/parsers/jg24/ListParserJG24.php',
-        'App\\Components\\Parsers\\Jgora24\\DetailsParserJgora24' => __DIR__ . '/../..' . '/components/parsers/jgora24/DetailsParserJgora24.php',
-        'App\\Components\\Parsers\\Jgora24\\ListParserJgora24' => __DIR__ . '/../..' . '/components/parsers/jgora24/ListParserJgora24.php',
-        'App\\Components\\Parsers\\Models\\NewsList' => __DIR__ . '/../..' . '/components/parsers/models/NewsList.php',
-        'App\\Components\\Parsers\\Models\\NewsListItem' => __DIR__ . '/../..' . '/components/parsers/models/NewsListItem.php',
-        'App\\Components\\Parsers\\Models\\SingleNews' => __DIR__ . '/../..' . '/components/parsers/models/SingleNews.php',
-        'App\\Components\\Parsers\\NewsDetailsFactory' => __DIR__ . '/../..' . '/components/parsers/NewsDetailsFactory.php',
-        'App\\Components\\Parsers\\NewsListFactory' => __DIR__ . '/../..' . '/components/parsers/NewsListFactory.php',
-        'App\\Controllers\\AboutController' => __DIR__ . '/../..' . '/controllers/AboutController.php',
-        'App\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/controllers/DashboardController.php',
-        'App\\Controllers\\ErrorController' => __DIR__ . '/../..' . '/controllers/ErrorController.php',
-        'App\\Controllers\\NewsController' => __DIR__ . '/../..' . '/controllers/NewsController.php',
-        'App\\Controllers\\SiteController' => __DIR__ . '/../..' . '/controllers/SiteController.php',
-        'App\\Models\\LoginModel' => __DIR__ . '/../..' . '/models/LoginModel.php',
-        'App\\Models\\User' => __DIR__ . '/../..' . '/models/User.php',
-        'Libs\\Base\\Bootstrap' => __DIR__ . '/..' . '/libs/base/Bootstrap.php',
-        'Libs\\Base\\Controller' => __DIR__ . '/..' . '/libs/base/Controller.php',
-        'Libs\\Base\\ControllerFactory' => __DIR__ . '/..' . '/libs/base/ControllerFactory.php',
-        'Libs\\Base\\Model' => __DIR__ . '/..' . '/libs/base/Model.php',
-        'Libs\\Base\\View' => __DIR__ . '/..' . '/libs/base/View.php',
-        'Libs\\Database\\DataBase' => __DIR__ . '/..' . '/libs/database/DataBase.php',
-        'Libs\\Exceptions\\MethodNotFoundException' => __DIR__ . '/..' . '/libs/exceptions/MethodNotFoundException.php',
-        'Libs\\Session\\Session' => __DIR__ . '/..' . '/libs/session/Session.php',
-    );
-
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitf905025f2bcf178b1bdc2d876e971647::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitf905025f2bcf178b1bdc2d876e971647::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitf905025f2bcf178b1bdc2d876e971647::$classMap;
 
         }, null, ClassLoader::class);
     }

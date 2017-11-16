@@ -12,7 +12,8 @@ use App\Components\Helpers\{
 use App\Models\{
   Category\Category,
   Category\CategoryQuery,
-  User\User
+  User\User,
+  Comment\Comment
 };
 use DateTime;
 
@@ -54,12 +55,12 @@ class Article extends Model
          'joined-table-column' => 'id',
          'model' => User::className()
        ],
-       'comments' => [
-         'has' => 'many',
-         'column' => 'id',
-         'joined-table-column' => 'article_id',
-         'model' => \App\Models\Comment\Comment::className()
-       ]
+       //'comments' => [
+       //   'has' => 'many',
+       //   'column' => 'id',
+       //   'joined-table-column' => 'article_id',
+       //   'model' => Comment::className()
+       // ]
      ];
    }
 

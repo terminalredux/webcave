@@ -37,6 +37,13 @@ class ArticleController extends Controller
 
   public function actionView(string $slug = null) {
     $this->checkParams(compact('slug'), 'article/list');
+    /* TESTIN NEW RELATIONS SYSTEM */
+    //article id = 8 do 13
+
+    $article = Article::getById(6);
+
+
+    /**/
     $article = Article::getBySlug($slug);
 
     if ($article) {
@@ -74,7 +81,7 @@ class ArticleController extends Controller
     }
     $tableFiller->setSortGroup('byAvailableFrom');
     $tableRows = $tableFiller->fetch();
-    
+
     return $this->render('article/list', ['tableRows' => $tableRows]);
   }
 

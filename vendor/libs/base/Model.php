@@ -50,151 +50,86 @@ abstract class Model
     return null;
   }
 
-  /**
-   * Find model by slug column. If you want to use
-   * this method you have to return slug property name
-   * by overriden method slugPoprerty() in concrete model
-   */
-  public static function getBySlug(string $slug) : ? self {
-    $classNamespace = '\\' . get_called_class();
-    $slugPropertyName = $classNamespace::slugProperty();
-    if (!$slugPropertyName) {
-      return null;
-    }
-    $model = new $classNamespace;
-    try {
-      $db = new DbConnection();
-      $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $slugPropertyName = :slug");
-      $statement->bindParam($slugPropertyName, $slug, PDO::PARAM_STR);
-      $statement->execute();
-      $row = $statement->fetch(PDO::FETCH_ASSOC);
-      $db = null;
-      if ($row) {
-        foreach($row as $key => $value) {
-          $model->$key = $value;
-        }
-        return self::createRelationsProperties($model);
-      }
-    } catch (PDOException $e) {
-      $e->getMessage();
-    }
-    return null;
-  }
-
-  private function initRelatedModels() : void {
-    $relations = static::relations();
-
-    for ($i = 1; $i <= count($relations); $i++) {
-      $propertyName = key($relations);
-      $modelNamespace = '\\' . current($relations)['model'];
-      $this->$propertyName = new $modelNamespace;
-
-      $fk_key = current($relations)['column'];
-      var_dump($this);die;
-
-      $this->$propertyName->getById();
-      next($relations);
-    }
-  }
-
-  /**
-   * Method is used in getBy* methods (e.g. getById).
-   * Create related models as a bace model properties
-   * - based on relations settings in concrete model.
-   * E.g. model News has a relation with
-   * Category model: $news->category->id
-   * returns ID of the category object
-   */
-  private static function createRelationsProperties(self $model) : self {
-    $relations = static::relations();
-
-    if ($relations) {
-      $relNames = array_keys($relations);
-      for ($i = 0; $i < count($relations); $i++) {
-        $relConf = $relations[$relNames[$i]];
-        $relPropName = $relNames[$i];
-        $relModel = '\\' . $relConf['model'];
-        $colName = $relConf['column'];
-        $joinedCol = $relConf['joined-table-column'];
-        if ($relConf['has'] == 'one') {
-          $model->$relPropName = $relModel::getById($model->$colName, $joinedCol);
-        } elseif ($relConf['has'] == 'many') {
-          //TODO problemy z rekurencją...
-          $model->$relPropName = $relModel::getAll($model->$colName, $joinedCol);
-        }
-      }
-    }
-    return $model;
-  }
-
-  /**
-   * Finds all by column. Written for
-   * relation has-many operation.
-   * @param string $columnValue if you want to provide ID you have treat it like a string
-   * @param string $columnName
-   * @return array of Models
-   */
-  public static function getAll(string $columnValue, string $columnName) : ? array {
-    $classNamespace = '\\' . get_called_class();
-
-    try {
-      $db = new DbConnection();
-      $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $columnName = :value");
-      $statement->bindParam(':value', $columnValue, PDO::PARAM_STR);
-      $statement->execute();
-      $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
-
-      $db = null;
-      $models = [];
-      if ($rows) {
-        foreach ($rows as $row) {
-          $model = new $classNamespace;
-          foreach ($row as $key => $value) {
-            $model->$key = $value;
-          }
-          $model = self::createRelationsProperties($model);
-          $models[] = $model;
-        }
-        //var_dump($models[1]->nick);die;
-        //return self::createRelationsProperties($model);
-        return $models;
-      }
-    } catch (PDOException $e) {
-      $e->getMessage();
-    }
-    return null;
-  }
 
   /**
    * Finds model in table by ID
    * @return Model||null
    */
   public static function getById(int $idValue, string $columnName = 'id') : ? self {
-    $classNamespace = '\\' . get_called_class();
-    $model = new $classNamespace;
+    $relationMap = [];
+    //$relationMap = self::getsRelationsHasOne($relationMap);
 
-    try {
-      $db = new DbConnection();
-      $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM " . $classNamespace::tableName() . " WHERE $columnName = :id");
-      $statement->bindParam(':id', $idValue, PDO::PARAM_INT);
-      $statement->execute();
-      $row = $statement->fetch(PDO::FETCH_ASSOC);
 
-      $db = null;
-      if ($row) {
-        foreach($row as $key => $value) {
-          $model->$key = $value;
-        }
-        return self::createRelationsProperties($model);
-      }
-    } catch (PDOException $e) {
-      $e->getMessage();
-    }
-    return null;
+    var_dump($sketchMap);die;
+
+    //$sql = self::sqlJoining();
+    //$sql .= $columnName . ' = ' . $idValue;
+    //var_dump($sql);die;
   }
+
+  /**
+   * Returns sql select columns & joining
+   * based on Model's relations settings.
+   * @return string
+   */
+  private static function sqlJoining() : string {
+    $relations = self::getsRelationsHasOne();
+
+    $baseTable = static::tableName();
+    $baseProperties = self::getProperties();
+    foreach ($baseProperties as &$property) {
+      $property = $baseTable . '.' . $property;
+    }
+    $colsFromBaseTabel = implode(', ', $baseProperties);
+    $colsFromJoinedTables = '';
+    foreach ($relations as $relation) {
+      $modelNamespace = '\\' . $relation['model'];
+      $modelTableName = $modelNamespace::tableName();
+      $modelProperties = $modelNamespace::getProperties();
+      foreach ($modelProperties as $key => &$value) {
+        $value = $modelTableName . '.' . $value . ' AS ' . $modelTableName . '_' . $value;
+      }
+      $colsFromJoinedTables .= ', ' . implode(', ', $modelProperties);
+
+    }
+    $sql = 'SELECT ' . $colsFromBaseTabel . ' ' . $colsFromJoinedTables . ' FROM ' . $baseTable;
+
+    foreach ($relations as $relation) {
+      $modelNamespace = '\\' . $relation['model'];
+      $modelTableName = $modelNamespace::tableName();
+      $sql .= ' INNER JOIN ' . $modelTableName . ' ON ' . $baseTable . '.' . $relation['column'] . ' = ' . $modelTableName . '.' . $relation['joined-table-column'];
+    }
+
+    return $sql . ' WHERE ' . $baseTable . '.';
+  }
+
+  /**
+   * Gets from Model's relations
+   * only with status has = one
+   * Adds to every relations parrent name if
+   * exists.
+   * @return array||null
+   */
+  private static function getsRelationsHasOne(array $relationMap) : ? array {
+    $relations = static::relations();
+
+    foreach ($relations as $key => $value) {
+      if ($value['has'] == 'one') {
+        $relationMap[$key] = $value;
+
+        $classNamespace = '\\' . $value['model'];
+        //$childRelations = $classNamespace::relations();
+
+
+
+      }
+    }
+    var_dump($relationMap);die;
+    return $relationMap;
+  }
+
+  //public static function getChildRelations() {
+  //}
 
   /**
    * Gets class properties that represents all of the

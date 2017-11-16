@@ -75,7 +75,12 @@ class Bootstrap
    */
   public function checkAction(string $alias) : bool {
     $url = $this->getUrl();
-    return $url[0] . '/' . $url[1] === $alias;
+    if (!isset($url[1])) {
+      $action = 'index';
+    } else {
+      $action = $url[1];
+    }
+    return $url[0] . '/' . $action === $alias;
   }
 
   /**

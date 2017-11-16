@@ -51,11 +51,19 @@
           <li><a href="<?= URL ?>comment/list/removed"><i class="fa fa-check"></i> Usunięte</a></li>
         </ul>
       </li>
-      <li class="treeview <?= $app->checkAction('category/list') ? 'active' : '' ?>">
+      <?php
+      if ($app->checkController('category') || $app->checkController('basecategory')) {
+        $action = 'active';
+      } else {
+        $action = '';
+      }
+      ?>
+      <li class="treeview <?= $action ?>">
         <a href="#">
           <i class="fa fa-list-ul"></i> <span>Kategorie</span> <i class="fa fa-angle-left pull-right"></i>
         </a>
         <ul class="treeview-menu">
+          <li><a href="<?= URL ?>basecategory/index"><i class="fa fa-star"></i> Kategorie bazowe</a></li>
           <li><a href="<?= URL ?>category/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
           <li><a href="<?= URL ?>category/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
         </ul>
