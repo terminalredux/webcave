@@ -33,7 +33,7 @@
         <a href="#">
           <i class="fa fa-file-text-o"></i> <span>Artykuły</span> <i class="fa fa-angle-left pull-right"></i>
         </a>
-        <ul class="treeview-menu">
+        <ul class="treeview-menu <?= $app->checkAction('article/list') ? 'menu-open' : '' ?>" style="<?= $app->checkAction('article/list') ? 'display: block;' : '' ?>">
           <li><a href="<?= URL ?>article/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
           <li><a href="<?= URL ?>article/list/publicated"><i class="fa fa-eye"></i> Publiczne</a></li>
           <li><a href="<?= URL ?>article/list/notpublicated"><i class="fa fa-eye-slash"></i> Niepubliczne</a></li>
@@ -54,18 +54,35 @@
       <?php
       if ($app->checkController('category') || $app->checkController('basecategory')) {
         $action = 'active';
+        $ulClass = 'menu-open';
+        $ulStyle = 'display: block;';
       } else {
         $action = '';
+        $ulClass = '';
+        $ulStyle = '';
       }
       ?>
       <li class="treeview <?= $action ?>">
         <a href="#">
           <i class="fa fa-list-ul"></i> <span>Kategorie</span> <i class="fa fa-angle-left pull-right"></i>
         </a>
-        <ul class="treeview-menu">
-          <li><a href="<?= URL ?>basecategory/index"><i class="fa fa-star"></i> Kategorie bazowe</a></li>
-          <li><a href="<?= URL ?>category/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
-          <li><a href="<?= URL ?>category/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
+        <ul class="treeview-menu <?= $ulClass ?>" style="<?= $ulStyle ?>">
+          <li class="<?= $app->checkController('basecategory') ? 'active' : '' ?>">
+            <a href="#"><i class="fa fa-star"></i> Kategorie główne <i class="fa fa-angle-left pull-right"></i></a>
+            <ul class="treeview-menu" <?= $app->checkAction('basecategory/list') ? 'menu-open' : '' ?> style="<?= $app->checkAction('basecategory/list') ? 'display: block;' : '' ?>">
+              <li><a href="<?= URL ?>basecategory/list/public"><i class="fa fa-check"></i> Aktywne</a></li>
+              <li><a href="<?= URL ?>basecategory/list/hidden"><i class="fa fa-eye-slash"></i> Ukryte</a></li>
+              <li><a href="<?= URL ?>basecategory/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
+            </ul>
+          </li>
+          <li class="<?= $app->checkController('category') ? 'active' : '' ?>">
+            <a href="#"><i class="fa fa-list-ul"></i> Pod kategorie <i class="fa fa-angle-left pull-right"></i></a>
+            <ul class="treeview-menu <?= $app->checkAction('category/list') ? 'menu-open' : '' ?>" style="<?= $app->checkAction('category/list') ? 'display: block;' : '' ?>">
+              <li><a href="<?= URL ?>category/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
+              <li><a href="#"><i class="fa fa-eye-slash"></i> Ukryte</a></li>
+              <li><a href="<?= URL ?>category/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
+            </ul>
+          </li>
         </ul>
       </li>
       <li class="<?= $app->checkController('file') ? 'active' : '' ?>">

@@ -19,12 +19,19 @@ class BaseCategoryController extends Controller
     return $this->executeAction('basecategory/list');
   }
 
-  public function actionList() {
+  public function actionList(string $status = 'active') {
     AccessControl::onlyForLogged();
-    $list = BaseCategory::all();
+    $status = BaseCategory::statusExists($status) ? $status : 'active';
+    $list = BaseCategory::all([
+      'order' => 'updated_at desc',
+      'conditions' => ['status' => BaseCategory::getStatusByAlias($status)]
+    ]);
+
+
     return $this->render('basecategory/list', [
       'list' => $list,
-      'editMode' => false
+      'editMode' => false,
+      'title' => BaseCategory::getStatusPrular()[$status]
     ]);
   }
 
@@ -43,7 +50,8 @@ class BaseCategoryController extends Controller
     } else {
       $this->error("Zadany status: $status nie istnieje!");
     }
-    return $this->executeAction('basecategory/list');
+    $param = $baseCategory ? BaseCategory::statusAlias()[$baseCategory->status] : 'active';
+    return $this->executeAction('basecategory/list/' . $param);
   }
 
   public function actionEdit(int $id = null) {
@@ -56,9 +64,9 @@ class BaseCategoryController extends Controller
       if ($baseCategory->save()) {
         $this->success("Pomyślnie edytowano katogorie bazową $baseCategory->name!");
       } else {
-        $this->error("Błąd podczas edycji kategorii bazowej $baseCategory->name!");
+        $this->error(implode('<br>', $baseCategory->errors->full_messages()));
       }
-      return $this->executeAction('basecategory/list');
+      return $this->executeAction('basecategory/list/' . BaseCategory::statusAlias()[$baseCategory->status]);
     }
 
     return $this->render('basecategory/form', [
@@ -77,7 +85,7 @@ class BaseCategoryController extends Controller
     } else {
       $this->error("Błąd podczas usuwania kategorii bazowej $baseCategory->name z bazy danych!");
     }
-    return $this->executeAction('basecategory/list');
+    return $this->executeAction('basecategory/list/removed');
   }
 
   public function actionAdd() {
@@ -88,7 +96,7 @@ class BaseCategoryController extends Controller
       if ($model->save()) {
         $this->success("Utworzono kategorie bazową $model->name");
       } else {
-        $this->error("Błąd podczas tworzenia kategorii bazowej $model->name");
+        $this->error(implode('<br>', $model->errors->full_messages()));
       }
     }
     return $this->executeAction('basecategory/list');

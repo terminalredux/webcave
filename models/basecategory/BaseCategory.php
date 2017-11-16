@@ -9,6 +9,34 @@ class BaseCategory extends \ActiveRecord\Model
 
   static $table_name = 'base_category';
 
+  static $validates_presence_of  = [
+    ['name', 'message' => ': musisz podać nazwę kategorii bazowej', 'on' => 'create']
+  ];
+  static $validates_size_of = [
+    ['name', 'within' => [2, 100], 'message' => ': nazwa musi mieć od 3 do 100 znaków']
+  ];
+  public function validate() {
+    //$this->is_new_record();
+    if ($this->validateUnique($this->name, $this->id)) {
+      $this->errors->add("name", ": nazwa kategorii bazowej musi być unikalna a $this->name jest już zajęte");
+    }
+  }
+
+  private function validateUnique($newBaseCategory, $newId) {
+    $baseCetrgories = $this->all();
+    $contains = false;
+    foreach ($baseCetrgories as $baseCategory) {
+      if (strtolower($baseCategory->name) == strtolower($newBaseCategory)) {
+        if (isset($newId) && $newId == $baseCategory->id) {
+          $contains = false;
+        } else {
+          $contains = true;
+        }
+      }
+    }
+    return $contains;
+  }
+
   public static function getStatus() {
     return [
       1 => 'Ukryty',
@@ -17,12 +45,24 @@ class BaseCategory extends \ActiveRecord\Model
     ];
   }
 
+  public static function getStatusPrular() : array {
+      return [
+        'hidden' => 'ukryte',
+        'active' => 'aktywne',
+        'removed' => 'usunięte'
+      ];
+    }
+
   public static function statusAlias() {
     return [
       1 => 'hidden',
       2 => 'active',
       3 => 'removed'
     ];
+  }
+
+  public static function getStatusByAlias($status) {
+    return array_flip(self::statusAlias())[$status];
   }
 
   public function setStatusColor() : string {
@@ -80,7 +120,7 @@ class BaseCategory extends \ActiveRecord\Model
   public function loadCreate() {
     $time = time();
     $this->name = $_POST['name'];
-    $this->status = self::HIDDEN;
+    $this->status = self::ACTIVE;
     $this->created_at = $time;
     $this->updated_at = $time;
   }

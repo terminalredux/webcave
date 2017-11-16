@@ -1,9 +1,9 @@
 <?php
 use App\Models\BaseCategory\BaseCategory;
 ?>
-<h1>Kategorie bazowe</h1>
+<h1>Kategorie bazowe (<?= $title ?>)</h1>
 <?= $this->render('basecategory/form', ['editMode' => $editMode]); ?>
-<br><br>
+<br><br><br><br><br><br>
 <div class="col-md-12">
   <table class="table table-striped table-hover" style="font-size: 0.9em;">
     <thead>
@@ -18,11 +18,7 @@ use App\Models\BaseCategory\BaseCategory;
         <tr>
           <td><?= $model->name ?></td>
           <td><?= date_format($model->created_at,"Y/m/d H:i:s")  ?></td>
-          <td class="text-center">
-            <div class="<?= $model->isEdited() ? 'model-edited' : '' ?>">
-              <?= date_format($model->updated_at,"Y/m/d H:i:s") ?>
-            </div>
-          </td>
+          <td><?= date_format($model->updated_at,"Y/m/d H:i:s") ?></td>
           <td class="text-center">
             <div data-toggle="status-menu"
                  class="<?= $model->setStatusColor() ?> article-status"
