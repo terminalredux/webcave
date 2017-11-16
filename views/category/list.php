@@ -19,7 +19,11 @@ use App\Models\Category\Category;
       <?php foreach ($categories as $category) : ?>
         <tr>
           <td><?= $category->name ?></td>
-          <td><?= $category->base_category_id ?></td>
+          <td class="text-center">
+            <div class="<?= $category->base_category->setStatusColor() ?>">
+            <?= $category->base_category->name ?>
+          </div>
+          </td>
           <td><?= date_format($category->created_at,"Y/m/d H:i:s")  ?></td>
           <td><?= date_format($category->updated_at,"Y/m/d H:i:s") ?></td>
           <td class="text-center">

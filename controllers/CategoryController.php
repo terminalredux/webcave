@@ -49,6 +49,7 @@ class CategoryController extends Controller
     AccessControl::onlyForLogged();
     $this->checkParams(compact('id'), 'category/list');
     $category = $this->findModel($id);
+
     $baseCategories = BaseCategory::all([
       'order' => 'name ASC',
       'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]

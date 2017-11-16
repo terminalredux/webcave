@@ -11,6 +11,10 @@ class Category extends \ActiveRecord\Model
 
   static $table_name = 'category';
 
+  static $belongs_to  = [
+    ['base_category' ,'class_name' => '\App\Models\BaseCategory\BaseCategory', 'foreign_key' => 'base_category_id']
+  ];
+
   static $validates_presence_of  = [
     ['name', 'message' => ': musisz podać nazwę kategorii', 'on' => 'create'],
     ['base_category_id', 'message' => ': musisz podać id kategorii bazowej', 'on' => 'create']

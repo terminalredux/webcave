@@ -78,11 +78,17 @@ class BaseCategoryController extends Controller
     $this->checkParams(compact('id'), 'basecategory/list/removed');
 
     $baseCategory = $this->findModel($id);
-    if ($baseCategory->delete()) {
-      $this->success("Kategorę bazową $baseCategory->name pomyślnie usunięto z bazy danych!");
+    if (!count($baseCategory->categories)) {
+      if ($baseCategory->delete()) {
+        $this->success("Kategorę bazową $baseCategory->name pomyślnie usunięto z bazy danych!");
+      } else {
+        $this->error("Błąd podczas usuwania kategorii bazowej $baseCategory->name z bazy danych!");
+      }
     } else {
-      $this->error("Błąd podczas usuwania kategorii bazowej $baseCategory->name z bazy danych!");
+      $this->error("Kategoria $baseCategory->name jest wykorzystywana przez podkategorie: <br>"
+      . $baseCategory->getCategoryRelations()) . "Na tą chwilę nie można jej usunąć !<br>";
     }
+
     return $this->executeAction('basecategory/list/removed');
   }
 

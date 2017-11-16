@@ -9,6 +9,10 @@ class BaseCategory extends \ActiveRecord\Model
 
   static $table_name = 'base_category';
 
+  static $has_many  = [
+    ['categories' ,'class_name' => '\App\Models\Category\Category']
+  ];
+
   static $validates_presence_of  = [
     ['name', 'message' => ': musisz podać nazwę kategorii bazowej', 'on' => 'create']
   ];
@@ -74,6 +78,14 @@ class BaseCategory extends \ActiveRecord\Model
       $class = 'model-removed';
     }
     return $class;
+  }
+
+  public function getCategoryRelations() : string {
+    $categories = '';
+    foreach($this->categories as $category) {
+      $categories .= $category->name . '<br>';
+    }
+    return $categories;
   }
 
   public static function statusExists(string $status) : bool {
