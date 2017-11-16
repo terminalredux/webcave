@@ -1,6 +1,8 @@
 <?php
 namespace App\Models\Category;
 
+use App\Models\BaseCategory\BaseCategory;
+
 class Category extends \ActiveRecord\Model
 {
   const ACTIVE = 1;
@@ -9,9 +11,42 @@ class Category extends \ActiveRecord\Model
 
   static $table_name = 'category';
 
+  static $validates_presence_of  = [
+    ['name', 'message' => ': musisz podać nazwę kategorii', 'on' => 'create'],
+    ['base_category_id', 'message' => ': musisz podać id kategorii bazowej', 'on' => 'create']
+  ];
+  static $validates_size_of = [
+    ['name', 'within' => [2, 100], 'message' => ': nazwa musi mieć od 2 do 100 znaków']
+  ];
+
+  public function validate() {
+    if ($this->validateBaseCategory($this->base_category_id) == false) {
+      $this->errors->add("base_category_id", ": Zadano nieznane ID kategorii bazowej!");
+    }
+  }
+
+  /**
+   * You can only add category base with status
+   * active or hidden. Removed not allowed
+   */
+  private function validateBaseCategory($baseCategoryId) {
+    $baseCategories = BaseCategory::all([
+      'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]
+    ]);
+    $allowedId = false;
+    foreach ($baseCategories as $baseCategory) {
+      if ($baseCategory->id == $baseCategoryId) {
+        $allowedId = true;
+      }
+    }
+    return $allowedId;
+  }
+
   public function loadCreate() : void {
     $this->name = $_POST['name'];
-    $this->base_category_id = $_POST['base_category_id'];
+    if (isset($_POST['base_category_id'])) {
+      $this->base_category_id = $_POST['base_category_id'];
+    }
     $this->status = self::ACTIVE;
   }
 

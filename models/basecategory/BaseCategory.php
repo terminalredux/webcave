@@ -13,7 +13,7 @@ class BaseCategory extends \ActiveRecord\Model
     ['name', 'message' => ': musisz podać nazwę kategorii bazowej', 'on' => 'create']
   ];
   static $validates_size_of = [
-    ['name', 'within' => [2, 100], 'message' => ': nazwa musi mieć od 3 do 100 znaków']
+    ['name', 'within' => [2, 100], 'message' => ': nazwa musi mieć od 2 do 100 znaków']
   ];
   public function validate() {
     if ($this->validateUnique($this->name, $this->id)) {

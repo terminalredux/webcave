@@ -24,7 +24,7 @@
               <option disabled selected value>Kategoria bazowa</option>
             <?php endif; ?>
             <?php foreach ($baseCategories as $baseCategory) : ?>
-              <option value="<?= $baseCategory->id ?>" <?= $baseCategory->id == $model->base_category_id ? 'selected' : '' ?>>
+              <option value="<?= $baseCategory->id ?>" <?= $editMode && $baseCategory->id == $model->base_category_id ? 'selected' : '' ?>>
                 <?= $baseCategory->name ?>
                 (<?= BaseCategory::getStatus()[$baseCategory->status] ?>)
               </option>
@@ -35,4 +35,22 @@
       </form>
     </div>
   </div>
+  <br><br>
 </div>
+<script>
+$('document').ready(function(){
+  $('#categoryForm').validate({
+    rules: {
+      name: {
+        required: true,
+        minlength: 2,
+        maxlength: 100
+      },
+      base_category_id: {
+        required: true,
+        digits: true
+      }
+    }
+  });
+});
+</script>
