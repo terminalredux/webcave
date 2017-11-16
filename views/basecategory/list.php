@@ -8,6 +8,7 @@ use App\Models\BaseCategory\BaseCategory;
   <table class="table table-striped table-hover" style="font-size: 0.9em;">
     <thead>
       <th>Nazwa</th>
+      <th>Kategorii</th>
       <th>Utworzony</th>
       <th>Zmodyfikowany</th>
       <th>Status</th>
@@ -17,6 +18,7 @@ use App\Models\BaseCategory\BaseCategory;
       <?php foreach ($list as $model) : ?>
         <tr>
           <td><?= $model->name ?></td>
+          <td><?= count($model->categories) ?></td>
           <td><?= date_format($model->created_at,"Y/m/d H:i:s")  ?></td>
           <td><?= date_format($model->updated_at,"Y/m/d H:i:s") ?></td>
           <td class="text-center">
