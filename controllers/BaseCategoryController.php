@@ -26,8 +26,6 @@ class BaseCategoryController extends Controller
       'order' => 'updated_at desc',
       'conditions' => ['status' => BaseCategory::getStatusByAlias($status)]
     ]);
-
-
     return $this->render('basecategory/list', [
       'list' => $list,
       'editMode' => false,
@@ -56,7 +54,7 @@ class BaseCategoryController extends Controller
 
   public function actionEdit(int $id = null) {
     AccessControl::onlyForLogged();
-    $this->checkParams(compact('id'), 'basecategory/index');
+    $this->checkParams(compact('id'), 'basecategory/list');
     $baseCategory = $this->findModel($id);
 
     if ($this->isPost()) {
@@ -77,7 +75,7 @@ class BaseCategoryController extends Controller
 
   public function actionDelete(int $id = null) {
     AccessControl::onlyForLogged();
-    $this->checkParams(compact('id'), 'basecategory/index');
+    $this->checkParams(compact('id'), 'basecategory/list/removed');
 
     $baseCategory = $this->findModel($id);
     if ($baseCategory->delete()) {

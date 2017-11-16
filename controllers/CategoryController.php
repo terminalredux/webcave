@@ -3,9 +3,9 @@ namespace App\Controllers;
 
 use Libs\Base\Controller;
 use Libs\AccessControl\AccessControl;
-use App\Models\Category\{
-  CategoryQuery,
-  Category
+use App\Models\{
+    BaseCategory\BaseCategory,
+    Category\Category
 };
 
 
@@ -18,142 +18,113 @@ class CategoryController extends Controller
     parent::__construct();
   }
 
-  /**
-   * This action exists only because
-   * default action is index but in this Controller
-   * main action is actionList
-   */
   public function actionIndex() {
     AccessControl::onlyForLogged();
     return $this->executeAction('category/list');
   }
 
-  /**
-   * Main action
-   * @param string $status
-   */
   public function actionList(string $status = 'active') {
     AccessControl::onlyForLogged();
-    if ($status == 'removed') {
-      $status = [Category::STATUS_REMOVED];
-    } elseif ($status == 'active') {
-      $status = [Category::STATUS_ACTIVE, Category::STATUS_HIDDEN];
-    } else {
-      return $this->refresh();
-    }
+    $status = Category::statusExists($status) ? $status : 'active';
 
-    $categories = CategoryQuery::getAll([
-      'sort' => ['updated_at', 'DESC'],
-      'status' => $status
+    $baseCategories = BaseCategory::all([
+      'order' => 'name ASC',
+      'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]
     ]);
+
+    $categories = Category::all([
+      'order' => 'updated_at DESC',
+      'conditions' => ['status' => Category::getStatusByAlias($status)]
+    ]);
+
+    return $this->render('category/list', [
+      'baseCategories' => $baseCategories,
+      'categories' => $categories,
+      'editMode' => false,
+      'title' => Category::getStatusPrular()[$status]
+    ]);
+  }
+
+  public function actionEdit(int $id = null) {
+    AccessControl::onlyForLogged();
+    $this->checkParams(compact('id'), 'category/list');
+    $category = $this->findModel($id);
+    $baseCategories = BaseCategory::all([
+      'order' => 'name ASC',
+      'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]
+    ]);
+
     if ($this->isPost()) {
-      $category = new Category();
+      $category->loadEdition();
       if ($category->save()) {
-        $this->success('Kategoria została utworzona!');
+        $this->success("Pomyślnie edytowano katogorie $category->name!");
       } else {
-        $this->error('Błąd podczas tworzenia nowej kategorii!');
+        $this->error(implode('<br>', $category->errors->full_messages()));
       }
-      return $this->refresh();
-    }
-    return $this->render('category/list', ['categories' => $categories]);
-  }
-
-  public function actionEdit(int $id = 0) {
-    AccessControl::onlyForLogged();
-    $category = CategoryQuery::getById($id);
-    if ($category) {
-      if ($this->isPost()) {
-        $category->editName();
-        if ($category->update()) {
-          $this->success('Nazwa kategorii została uaktualniona!');
-        } else {
-          $this->error('Błąd podczas uaktualniania nazwy kategorii!');
-        }
-        return $this->executeAction('category/list');
-      } else {
-        return $this->render('category/edit', ['category' => $category]);
-      }
-    } else {
-      $this->error('Kategoria o ID ' . $id . ' nie istnieje!');
-      return $this->executeAction('category/list');
+      return $this->executeAction('category/list/' . Category::statusAlias()[$category->status]);
     }
 
+    return $this->render('category/form', [
+      'baseCategories' => $baseCategories,
+      'model' => $category,
+      'editMode' => true
+    ]);
   }
 
-  /**
-   * @param $id default 0 if user not provides a param
-   */
-  public function actionSoftRemove(int $id = 0) {
+  public function actionAdd() {
     AccessControl::onlyForLogged();
-    $category = CategoryQuery::getById($id);
-    if ($category) {
-      $category->softRemove();
-      if ($category->update()) {
-        $this->success('Kategoria została przeniesiona do usuniętych!');
+
+    if ($this->isPost()) {
+      $model = new Category();
+      $model->loadCreate();
+      if ($model->save()) {
+        $this->success("Utworzono nową kategorię $model->name!");
       } else {
-        $this->error('Błąd podczas usuwania kategorii!');
+        $this->error(implode('<br>', $model->errors->full_messages()));
+      }
+    }
+    return $this->executeAction('category/list');
+  }
+
+  public function actionChangeStatus(int $id = null, string $status = null) {
+    AccessControl::onlyForLogged();
+    $this->checkParams(compact('id', 'status'), 'category/index');
+
+    if (Category::statusExists($status)) {
+      $category = $this->findModel($id);
+      $category->setStatus($status);
+      if ($category->save()) {
+        $this->success("Pomślnie zmieniono status kategorii $category->name!");
+      } else {
+        $this->error(implode('<br>', $category->errors->full_messages()));
       }
     } else {
-      $this->error('Kategoria o ID ' . $id . ' nie istnieje!');
+      $this->error("Zadany status: $status nie istnieje!");
+    }
+    $param = $category ? Category::statusAlias()[$category->status] : 'active';
+    return $this->executeAction('category/list/' . $param);
+  }
+
+  public function actionDelete(int $id = null) {
+    AccessControl::onlyForLogged();
+    $this->checkParams(compact('id'), 'category/list/removed');
+
+    $category = $this->findModel($id);
+    if ($category->delete()) {
+      $this->success("Pomyślnie usunięto kategorę $category->name z bazy danych!");
+    } else {
+      $this->error(implode('<br>', $category->errors->full_messages()));
     }
     return $this->executeAction('category/list/removed');
   }
 
-  /**
-   * @param $id default 0 if user not provides a param
-   */
-  public function actionActivation(int $id = 0) {
-    AccessControl::onlyForLogged();
-    $category = CategoryQuery::getById($id);
-    if ($category) {
-      $category->activation();
-      if ($category->update()) {
-        $this->success('Kategoria została aktywowana!');
-      } else {
-        $this->error('Błąd podczas aktywowania kategorii!');
-      }
+  private function findModel(int $id) {
+    if (Category::exists($id)) {
+      return Category::find($id);
     } else {
-      $this->error('Kategoria o ID ' . $id . ' nie istnieje!');
+      $this->error("Model o zadanym ID: $id nie istnieje!");
+      return $this->executeAction('category/list');
     }
-    return $this->executeAction('category/list');
   }
-
-  /**
-   * @param $id default 0 if user not provides a param
-   */
-  public function actionHide(int $id = 0) {
-    AccessControl::onlyForLogged();
-    $category = CategoryQuery::getById($id);
-    if ($category) {
-      $category->hide();
-      if ($category->update()) {
-        $this->success('Kategoria została ukryta!');
-      } else {
-        $this->error('Błąd podczas zmiany statusu kategorii na ukrytą!');
-      }
-    } else {
-      $this->error('Kategoria o ID ' . $id . ' nie istnieje!');
-    }
-    return $this->executeAction('category/list');
-  }
-
-  /**
-   * Remove category from the database
-   * @param $id default 0 if user not provides a param
-   */
-   public function actionHardRemove(int $id = 0) {
-     AccessControl::onlyForLogged();
-     $category = CategoryQuery::getById($id);
-     if ($category) {
-       if ($category->delete()) {
-         $this->success('Kategoria została na stałe usujnięta z bazy danych!');
-       } else {
-         $this->error('Błąd podczas usuwania kategorii!');
-       }
-     } else {
-       $this->error('Kategoria o ID ' . $id . ' nie istnieje!');
-     }
-     return $this->executeAction('category/list/removed');
-   }
 
 }

@@ -79,14 +79,14 @@
             <a href="#"><i class="fa fa-list-ul"></i> Pod kategorie <i class="fa fa-angle-left pull-right"></i></a>
             <ul class="treeview-menu <?= $app->checkAction('category/list') ? 'menu-open' : '' ?>" style="<?= $app->checkAction('category/list') ? 'display: block;' : '' ?>">
               <li><a href="<?= URL ?>category/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
-              <li><a href="#"><i class="fa fa-eye-slash"></i> Ukryte</a></li>
+              <li><a href="<?= URL ?>category/list/hidden"><i class="fa fa-eye-slash"></i> Ukryte</a></li>
               <li><a href="<?= URL ?>category/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
             </ul>
           </li>
         </ul>
       </li>
       <li class="<?= $app->checkController('file') ? 'active' : '' ?>">
-        <a href="<?= URL ?>file/index"><i class="fa fa-file-image-o"></i> <span>Pliki</span></a>
+        <a href="<?= URL ?>file/index"><i class="fa fa-file-image-o"></i> <span>Zdjęcia</span></a>
       </li>
     </ul>
   </section>

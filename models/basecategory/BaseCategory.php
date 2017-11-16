@@ -16,7 +16,6 @@ class BaseCategory extends \ActiveRecord\Model
     ['name', 'within' => [2, 100], 'message' => ': nazwa musi mieć od 3 do 100 znaków']
   ];
   public function validate() {
-    //$this->is_new_record();
     if ($this->validateUnique($this->name, $this->id)) {
       $this->errors->add("name", ": nazwa kategorii bazowej musi być unikalna a $this->name jest już zajęte");
     }

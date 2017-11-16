@@ -1,78 +1,73 @@
 <?php
-use App\Components\Helpers\CategoryHelper;
-use Libs\Base\Bootstrap;
-$app = Bootstrap::getInstance();
+use App\Models\Category\Category;
 ?>
-<h1>Kategorie</h1>
+<h1>Kategorie (<?= $title ?>)</h1>
 <br>
-<?php if (!$app->checkParam('removed')) : ?>
-  <div class="row">
-    <div class="col-md-4">
-      <form action="<?= URL ?>category/list" method="post" id="categoryForm">
-        <div class="form-group">
-          <input type="text" name="name" id="name" placeholder="Nazwa kategorii" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-success">Dodaj</button>
-      </form>
-    </div>
-  </div>
-  <br>
-<?php endif; ?>
-<small>Sortowanie według daty zmodyfikowania (malejąco)</small>
-<br><br>
-<div class="row">
-  <div class="col-md-12">
-    <table class="table table-striped table-hover">
-      <thead>
+<?= $this->render('category/form', ['baseCategories' => $baseCategories, 'editMode' => $editMode]) ?>
+<br><br><br><br><br><br>
+<div class="col-md-12">
+  <table class="table table-striped table-hover" style="font-size: 0.9em;">
+    <thead>
+      <th>Nazwa</th>
+      <th>Kategoria bazowa</th>
+      <th>Utworzony</th>
+      <th>Zmodyfikowany</th>
+      <th>Status</th>
+      <th></th>
+    </thead>
+    <tbody>
+      <?php foreach ($categories as $category) : ?>
         <tr>
-          <th>Kategoria</th>
-          <th>Utworzono</th>
-          <th>Zmodyfikowano</th>
-          <th>Status</th>
-          <th>Zmień status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach($categories as $category): ?>
-          <tr>
-            <td><?= $category->name ?></td>
-            <td><?= date('d/m/Y H:i', $category->created_at) ?></td>
-            <td><?= date('d/m/Y H:i', $category->updated_at) ?></td>
-            <td  class="text-center">
-              <div class="<?= CategoryHelper::bgColor()[$category->status] ?> ">
-                <?= CategoryHelper::getStatus()[$category->status] ?>
-              </div>
-            </td>
-            <td>
-              <?php if ($category->status == CategoryHelper::STATUS_ACTIVE) : ?>
-                <a href="<?= URL ?>category/hide/<?= $category->id ?>">Ukryj</a>
-              <?php elseif ($category->status == (CategoryHelper::STATUS_HIDDEN || CategoryHelper::STATUS_REMOVED)) : ?>
-                <a href="<?= URL ?>category/activation/<?= $category->id ?>">Przywróć</a>
-              <?php endif; ?>
-            </td>
-            <td>
-              <a href="<?= URL ?>category/edit/<?= $category->id ?>" class="fa-icon">
-                <i class="fa fa-pencil" aria-hidden="true" title="Edytuj"></i>
+          <td><?= $category->name ?></td>
+          <td><?= $category->base_category_id ?></td>
+          <td><?= date_format($category->created_at,"Y/m/d H:i:s")  ?></td>
+          <td><?= date_format($category->updated_at,"Y/m/d H:i:s") ?></td>
+          <td class="text-center">
+            <div data-toggle="status-menu"
+                 class="<?= $category->setStatusColor() ?> article-status"
+                 data-content="
+                 <?php if ($category->isRemoved()) :?>
+                   <a href='<?= URL?>category/changestatus/<?= $category->id ?>/active' class='btn btn-success change-status-btn' role='button'>Aktywny</a>
+                   <a href='<?= URL?>category/changestatus/<?= $category->id ?>/hidden' class='btn btn-warning change-status-btn' role='button'>Ukryty</a>
+                 <?php elseif ($category->isActive()) : ?>
+                   <a href='<?= URL?>category/changestatus/<?= $category->id ?>/hidden' class='btn btn-warning change-status-btn' role='button'>Ukryty</a>
+                 <?php elseif ($category->isHidden()) : ?>
+                   <a href='<?= URL?>category/changestatus/<?= $category->id ?>/active' class='btn btn-success change-status-btn' role='button'>Aktywny</a>
+                 <?php endif; ?>
+                 ">
+              <?= Category::getStatus()[$category->status] ?>
+            </div>
+          </td>
+          <td>
+            <a href="<?= URL ?>category/edit/<?= $category->id ?>" class="fa-icon">
+              <i class="fa fa-pencil" aria-hidden="true" title="Edytuj"></i>
+            </a>
+            <?php if ($category->isRemoved()) : ?>
+              &nbsp;
+              <a id="<?= $category->id ?>"
+                 class="show-modal-btn"
+                 data-toggle="modal"
+                 data-target="#hard-remove-modal"
+                 role="button"
+                 class="fa-icon">
+                <i class="fa fa-times" aria-hidden="true" title="Usuń z bazy danych"></i>
               </a>
-              <?php if ($category->status != CategoryHelper::STATUS_REMOVED) : ?>
-                &nbsp;
-                <a href="<?= URL ?>category/softremove/<?= $category->id ?>" class="fa-icon">
-                  <i class="fa fa-trash" aria-hidden="true" title="Usuń"></i>
-                </a>
-              <?php endif; ?>
-              <?php if ($category->status == CategoryHelper::STATUS_REMOVED) : ?>
-                &nbsp;
-                <a id="<?= $category->id ?>" class="show-modal-btn" role="button" data-toggle="modal" data-target="#hard-remove-modal" class="fa-icon">
-                  <i class="fa fa-times" aria-hidden="true" title="Twarde kasowanie"></i>
-                </a>
-              <?php endif; ?>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-</div>
+            <?php else: ?>
+              &nbsp;
+              <a href="<?= URL ?>category/changestatus/<?= $category->id ?>/removed" class="fa-icon">
+                <i class="fa fa-trash" aria-hidden="true" title="Usuń"></i>
+              </a>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+  <?php if (empty($categories)) : ?>
+    <div class="text-center">
+      <h4>Brak danych</h4>
+    </div>
+  <?php endif; ?>
 </div>
 <!-- Modal -->
 <div id="hard-remove-modal" class="modal fade" role="dialog">
@@ -86,14 +81,14 @@ $app = Bootstrap::getInstance();
         <p>Jesteś pewien że chcesz na stałe usunąć kategorię? Zmian nie będzie można przywrócić!</p>
       </div>
       <div class="modal-footer">
-        <button href="<?= URL ?>category/hardremove/" class="btn btn-danger" id="hard-remove-btn">Usuń</button>
+        <button href="<?= URL ?>category/delete/" class="btn btn-danger" id="hard-remove-btn">Usuń</button>
         <button class="btn btn-success" data-dismiss="modal">Anuluj</button>
       </div>
     </div>
   </div>
 </div>
-
 <script>
+$(document).ready(function(){
   var id;
 
   $('.show-modal-btn').click(function () {
@@ -105,13 +100,14 @@ $app = Bootstrap::getInstance();
     window.location = url + id;
   });
 
-  $('#categoryForm').validate({
-    rules: {
-      name: {
-        required: true,
-        minlength: 2,
-        maxlength: 100
-      }
-    }
+  $('[data-toggle="status-menu"]').popover({
+    html: 'true',
+    title: 'Zmień statusn na:',
+    placement: 'left'
   });
+
+  $('[data-toggle="status-menu"]').on('click', function (e) {
+    $('[data-toggle="status-menu"]').not(this).popover('hide');
+  });
+});
 </script>

@@ -66,7 +66,6 @@ use App\Models\BaseCategory\BaseCategory;
     </div>
   <?php endif; ?>
 </div>
-
 <!-- Modal -->
 <div id="hard-remove-modal" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -85,7 +84,6 @@ use App\Models\BaseCategory\BaseCategory;
     </div>
   </div>
 </div>
-
 <script>
 $(document).ready(function(){
   var id;

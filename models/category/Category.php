@@ -1,75 +1,103 @@
 <?php
 namespace App\Models\Category;
 
-use Libs\Base\Model;
-use App\Models\{
-  BaseCategory\BaseCategory
-};
-
-class Category extends Model
+class Category extends \ActiveRecord\Model
 {
-  public $id;
-  public $base_category_id;
-  public $name;
-  public $status;
-  public $created_at;
-  public $updated_at;
+  const ACTIVE = 1;
+  const HIDDEN = 2;
+  const REMOVED = 3;
 
-  const STATUS_ACTIVE = 1;
-  const STATUS_HIDDEN = 2;
-  const STATUS_REMOVED = 3;
+  static $table_name = 'category';
 
-  /**
-   * @inheritdoc
-   */
-  public static function tableName() : string {
-    return "category";
-  }
-
-  /**
-   * @inheritdoc
-   */
-  public static function relations() : ? array {
-    return null;
-  }
-
-  /**
-   * @inheritdoc
-   */
-  public function getForm() : void {
+  public function loadCreate() : void {
     $this->name = $_POST['name'];
-    $this->base_category_id = 1;
-    $this->status = self::STATUS_ACTIVE;
-    $this->created_at = time();
-    $this->updated_at = time();
+    $this->base_category_id = $_POST['base_category_id'];
+    $this->status = self::ACTIVE;
   }
 
-  /**
-   * Changes status of category to REMOVED
-   */
-  public function softRemove() : void {
-    $this->status = Category::STATUS_REMOVED;
-  }
-
-  /**
-   * Change category status to ACTIVE
-   */
-  public function activation() : void {
-    $this->status = Category::STATUS_ACTIVE;
-  }
-
-  /**
-   * Change category status to HIDDEN
-   */
-  public function hide() : void {
-    $this->status = Category::STATUS_HIDDEN;
-  }
-
-  /**
-   * Change category name
-   */
-  public function editName() : void {
+  public function loadEdition() {
     $this->name = $_POST['name'];
+    $this->base_category_id = $_POST['base_category_id'];
+  }
+
+  public static function getStatus() {
+    return [
+      1 => 'Aktywny',
+      2 => 'Ukryty',
+      3 => 'Usunięty'
+    ];
+  }
+
+  public static function statusAlias() {
+    return [
+      1 => 'active',
+      2 => 'hidden',
+      3 => 'removed'
+    ];
+  }
+
+  public static function getStatusPrular() : array {
+      return [
+        'hidden' => 'ukryte',
+        'active' => 'aktywne',
+        'removed' => 'usunięte'
+      ];
+    }
+
+  public static function statusExists(string $status) : bool {
+    if (in_array($status, self::statusAlias())) {
+      return true;
+    }
+    return false;
+  }
+
+  public static function getStatusByAlias($status) {
+    return array_flip(self::statusAlias())[$status];
+  }
+
+  public function setStatusColor() : string {
+    $class = '';
+    if ($this->status == self::HIDDEN) {
+      $class = 'model-hidden';
+    } elseif ($this->status == self::ACTIVE) {
+      $class = 'model-active';
+    } elseif ($this->status == self::REMOVED) {
+      $class = 'model-removed';
+    }
+    return $class;
+  }
+
+  public function setStatus(string $status) : void {
+    $stat = (int) array_flip($this->statusAlias())[$status];
+    $this->status = $stat;
+  }
+
+  public function isRemoved() : bool {
+    if ($this->status == self::REMOVED) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isActive() : bool {
+    if ($this->status == self::ACTIVE) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isHidden() : bool {
+    if ($this->status == self::HIDDEN) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isEdited() : bool {
+    if ($this->created_at != $this->updated_at) {
+      return true;
+    }
+    return false;
   }
 
 }
