@@ -8,7 +8,7 @@ use App\Models\BaseCategory\BaseCategory;
   <table class="table table-striped table-hover" style="font-size: 0.9em;">
     <thead>
       <th>Nazwa</th>
-      <th>Kategorii</th>
+      <th>l. kategorii</th>
       <th>Utworzony</th>
       <th>Zmodyfikowany</th>
       <th>Status</th>

@@ -24,7 +24,7 @@ class Category extends \ActiveRecord\Model
   ];
 
   public function validate() {
-    if ($this->validateBaseCategory($this->base_category_id) == false) {
+    if ($this->validateBaseCategory($this->status ,$this->base_category_id) == false) {
       $this->errors->add("base_category_id", ": Zadano nieznane ID kategorii bazowej!");
     }
   }
@@ -33,9 +33,10 @@ class Category extends \ActiveRecord\Model
    * You can only add category base with status
    * active or hidden. Removed not allowed
    */
-  private function validateBaseCategory($baseCategoryId) {
+  private function validateBaseCategory($status, $baseCategoryId) {
+    $baseCAtegoryStatus = [BaseCategory::ACTIVE, BaseCategory::HIDDEN, BaseCategory::REMOVED];
     $baseCategories = BaseCategory::all([
-      'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]
+      'conditions' => ['status' => $baseCAtegoryStatus]
     ]);
     $allowedId = false;
     foreach ($baseCategories as $baseCategory) {
@@ -91,7 +92,15 @@ class Category extends \ActiveRecord\Model
   }
 
   public static function getStatusByAlias($status) {
-    return array_flip(self::statusAlias())[$status];
+    $result = 1;
+    if ($status == 'active') {
+      $result = 1;
+    } elseif ($status == 'hidden') {
+      $result = 2;
+    } elseif ($status == 'removed') {
+      $result = 3;
+    }
+    return $result;
   }
 
   public function setStatusColor() : string {
@@ -104,6 +113,57 @@ class Category extends \ActiveRecord\Model
       $class = 'model-removed';
     }
     return $class;
+  }
+
+  /**
+   * choose param for route afte change status,
+   * creating new ones or edit
+   */
+  public function chooseParam() : string {
+    $param = 'active';
+    if ($this->status == Category::ACTIVE && $this->base_category->status == BaseCategory::ACTIVE) {
+      $param = 'active';
+    } elseif (($this->status == Category::HIDDEN && $this->base_category->status == BaseCategory::ACTIVE) ||
+              ($this->status == Category::ACTIVE && $this->base_category->status == BaseCategory::HIDDEN) ||
+              ($this->status == Category::HIDDEN && $this->base_category->status == BaseCategory::HIDDEN)) {
+      $param = 'hidden';
+    } elseif ($this->status == Category::REMOVED || $this->base_category->status == BaseCategory::REMOVED) {
+      $param = 'removed';
+    }
+    return $param;
+  }
+
+  /**
+   * Returns category list depedns on category
+   * status and basecategory status
+   * active:  c.status = active  && bc.status = active
+   * hidden:  c.status = hidden  && bc.status = active | hidden
+   * removed: c.status = removed && bc.status = active | hidden | removed
+   */
+  public static function availableCategorires(string $status, array $categories) : array {
+    $categoryList = [];
+    if ($status == 'active') {
+      foreach ($categories as $category) {
+        if ($category->status == Category::ACTIVE && $category->base_category_status == BaseCategory::ACTIVE) {
+          $categoryList[] = $category;
+        }
+      }
+    } elseif ($status == 'hidden') {
+      foreach ($categories as $category) {
+        if (($category->status == Category::ACTIVE && $category->base_category_status == BaseCategory::HIDDEN) ||
+            ($category->status == Category::HIDDEN && $category->base_category_status == BaseCategory::ACTIVE) ||
+            ($category->status == Category::HIDDEN && $category->base_category_status == BaseCategory::HIDDEN)) {
+          $categoryList[] = $category;
+        }
+      }
+    } elseif ($status == 'removed') {
+      foreach ($categories as $category) {
+        if (($category->status == Category::REMOVED || $category->base_category_status == BaseCategory::REMOVED)) {
+          $categoryList[] = $category;
+        }
+      }
+    }
+    return $categoryList;
   }
 
   public function setStatus(string $status) : void {

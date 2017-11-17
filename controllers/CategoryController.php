@@ -32,14 +32,19 @@ class CategoryController extends Controller
       'conditions' => ['status' => [BaseCategory::ACTIVE, BaseCategory::HIDDEN]]
     ]);
 
+    $join = 'INNER JOIN base_category bc ON(category.base_category_id = bc.id)';
+    $sel = 'category.*, bc.status as base_category_status';
     $categories = Category::all([
+      'joins' => $join,
+      'select' => $sel,
       'order' => 'updated_at DESC',
-      'conditions' => ['status' => Category::getStatusByAlias($status)]
     ]);
+
+    $categoryList = Category::availableCategorires($status, $categories);
 
     return $this->render('category/list', [
       'baseCategories' => $baseCategories,
-      'categories' => $categories,
+      'categories' => $categoryList,
       'editMode' => false,
       'title' => Category::getStatusPrular()[$status]
     ]);
@@ -102,7 +107,7 @@ class CategoryController extends Controller
     } else {
       $this->error("Zadany status: $status nie istnieje!");
     }
-    $param = $category ? Category::statusAlias()[$category->status] : 'active';
+    $param = $category->chooseParam();
     return $this->executeAction('category/list/' . $param);
   }
 
