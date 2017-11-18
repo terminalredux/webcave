@@ -1,7 +1,7 @@
 <?php
 use App\Models\Category\Category;
 ?>
-<h1>Kategorie (<?= $title ?>)</h1>
+<h1>Podkategorie (<?= $title ?>)</h1>
 <br>
 <?= $this->render('category/form', ['baseCategories' => $baseCategories, 'editMode' => $editMode]) ?>
 <br><br><br><br><br><br>

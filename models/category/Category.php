@@ -60,6 +60,15 @@ class Category extends \ActiveRecord\Model
     $this->base_category_id = $_POST['base_category_id'];
   }
 
+  public function getCategoryClass() : string {
+    if ($this->status == Category::ACTIVE && $this->base_category->status == BaseCategory::ACTIVE) {
+      $class = 'model-active';
+    } else {
+      $class = 'model-hidden';
+    }
+    return $class;
+  }
+
   public static function getStatus() {
     return [
       1 => 'Aktywny',
@@ -131,6 +140,29 @@ class Category extends \ActiveRecord\Model
       $param = 'removed';
     }
     return $param;
+  }
+
+  /**
+   * For category select in article/add
+   * Gets active category, remove where
+   * category_status = removed && basecategory_status = removed
+   */
+  public static function getActiveCategory(array $categories) : array {
+    $list = [];
+    foreach ($categories as $category) {
+      if ($category->status != Category::REMOVED &&
+          $category->base_category_status != BaseCategory::REMOVED) {
+          $list[] = $category;
+      }
+    }
+    return $list;
+  }
+
+  public function isHiddenGlobaly() : bool {
+    if ($this->status == Category::HIDDEN || $this->base_category->status == BaseCategory::HIDDEN) {
+      return true;
+    }
+    return false;
   }
 
   /**

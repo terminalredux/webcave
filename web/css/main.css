@@ -82,6 +82,30 @@ a.fa-icon:hover {
   border-radius: 10px;
   color: #fefefe;
 }
+
+/** Tag/Category buttons **/
+.category {
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.0);
+  border: 1px solid #8e44ad;
+  color: #8e44ad;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
+.category:visited {
+  color: #8e44ad;
+}
+
+.category:hover {
+  background-color: #8e44ad;
+  color: #fdfdfd;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
 /** Article table **/
 .article-status {
   cursor:pointer;

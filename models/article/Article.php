@@ -1,139 +1,120 @@
 <?php
 namespace App\Models\Article;
 
-use Libs\Database\DbConnection;
-use Libs\Base\Model;
-use Libs\FlashMessage\FlashConf;
-use Libs\AccessControl\AccessControl;
-use App\Components\Helpers\{
-  ArticleHelper,
-  CategoryHelper
-};
-use App\Models\{
-  Category\Category,
-  Category\CategoryQuery,
-  User\User,
-  Comment\Comment
-};
-use DateTime;
-
-class Article extends Model
+class Article extends \ActiveRecord\Model
 {
-  public $id;
-  public $category_id;
-  public $user_id;
-  public $title;
-  public $slug;
-  public $content;
-  public $views;
-  public $available_from;
-  public $status;
-  public $created_at;
-  public $updated_at;
+  const UNPUBLICATED = 1;
+  const PUBLICATED = 2;
+  const REMOVED = 3;
+  const SKETCH = 4;
 
-  /**
-   * @inheritdoc
-   */
-  public static function tableName() : string {
-    return "article";
-  }
+  static $table_name = 'article';
 
-  /**
-   * @inheritdoc
-   */
-  public static function relations() : ? array {
-     return [
-       'category' => [    //Relation name
-         'has' => 'one',
-         'column' => 'category_id',
-         'joined-table-column' => 'id',
-         'model' => Category::className()
-       ],
-       'user' => [
-         'has' => 'one',
-         'column' => 'user_id',
-         'joined-table-column' => 'id',
-         'model' => User::className()
-       ],
-       //'comments' => [
-       //   'has' => 'many',
-       //   'column' => 'id',
-       //   'joined-table-column' => 'article_id',
-       //   'model' => Comment::className()
-       // ]
-     ];
-   }
+  static $belongs_to  = [
+    ['category' ,'class_name' => '\App\Models\Category\Category', 'foreign_key' => 'category_id']
+  ];
 
-  /**
-   * @inheritdoc
-   */
-  public static function slugProperty() : ? string {
-     return 'slug';
-  }
+  static $validates_presence_of  = [
+    ['title', 'message' => ': musisz podać tytuł', 'on' => 'create'],
+    ['category_id', 'message' => ': musisz podać kategorię', 'on' => 'create'],
+    ['content', 'message' => ': musisz dodać zawartość', 'on' => 'create']
+  ];
+  static $validates_size_of = [
+    ['title', 'within' => [10, 255], 'message' => ': nazwa musi mieć od 10 do 255 znaków']
+  ];
+  static $validates_numericality_of = [
+    ['category_id', 'only_integer' => true, 'message' => ': ID musi być liczbą'],
+  ];
 
-  /**
-   * @inheritdoc
-   */
-  public function getForm() : void {
+  public function loadCreate() {
     $this->title = $_POST['title'];
-    $this->category_id = $_POST['category_id'];
-    $this->user_id = 1;
-    $this->content = $_POST['content'];
-    $this->slug = $this->checkSlug($this->createSlug());
-    $this->views = 0;
-    $this->available_from = $this->getAvailableFrom();
-    $this->status = $this->getStatus();
-    $this->created_at = time();
-    $this->updated_at = time();
-  }
-
-  private function createSlug() : string {
-    $text = $this->title;
-    $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-    $text = preg_replace('~[^-\w]+~', '', $text);
-    $text = trim($text, '-');
-    $text = preg_replace('~-+~', '-', $text);
-    $text = strtolower($text);
-    if (empty($text)) {
-      return 'n-a';
+    $this->slug = $this->generateSlug();
+    $this->user_id = 1; //TODO only for testing!!!
+    if (isset($_POST['category_id'])) {
+      $this->category_id = $_POST['category_id'];
     }
-    return $text;
+    $this->content = $_POST['content'];
+    if (isset($_POST['is_sketch'])) {
+      $this->status = self::SKETCH;
+    } else {
+      $this->status = self::UNPUBLICATED;
+    }
+    if (!$this->isSketch()) {
+      if (!empty($_POST['available_from'])) {
+        $this->available_from = $_POST['available_from'];
+      } else {
+        $this->available_from = date('Y-m-d H:i:s', time());
+      }
+    }
   }
 
-  /**
-   * If article is available
-   * in the futrue returns true
-   */
-  public function isPending() : bool {
-    if ($this->available_from > time()) {
+  public static function statusAlias() {
+    return [
+      1 => 'unpublicated',
+      2 => 'publicated',
+      3 => 'removed',
+      4 => 'sketch'
+    ];
+  }
+
+  public static function statusAliasToSet() {
+    return [
+      1 => 'unpublicated',
+      2 => 'publicated',
+      3 => 'removed'
+    ];
+  }
+
+  public function setStatus(string $status) : void {
+    $stat = (int) array_flip($this->statusAlias())[$status];
+    if ($this->status == self::SKETCH) {
+      $this->available_from = date('Y-m-d H:i:s', time());
+    }
+    $this->status = $stat;
+  }
+
+  public function loadEdition() : bool {
+    $edited = false;
+    if ($this->title != $_POST['title']) {
+      $this->title = $_POST['title'];
+      $this->slug = $this->generateSlug();
+      $edited = true;
+    }
+    if ($this->content != $_POST['content']) {
+      $this->content = $_POST['content'];
+      if ($this->status != self::SKETCH) {
+        $this->content_edited = date('Y-m-d H:i:s', time());
+      }
+      $edited = true;
+    }
+    if (isset($_POST['category_id']) && ($this->category_id != $_POST['category_id'])) {
+      $this->category_id = $_POST['category_id'];
+      $edited = true;
+    }
+    if (isset($_POST['available_from']) && ($this->available_from->format('d-m-Y H:m') != $_POST['available_from'])) {
+      $this->available_from = $_POST['available_from'];
+    }
+
+
+    return $edited;
+  }
+
+  public static function statusExists(string $status) : bool {
+    if (in_array($status, self::statusAliasToSet())) {
       return true;
     }
     return false;
   }
 
-  private function getAvailableFrom() : ? int {
-    if (isset($_POST['is_sketch']) ) {
-      $result = 0;
-    } elseif (empty($_POST['available_from'])) {
-      $result = time();
-    } else {
-      $result = strtotime($_POST['available_from']);
+  public static function statusToSetExists(string $status) : bool {
+    if (in_array($status, self::statusAliasToSet())) {
+      return true;
     }
-    return $result;
-  }
-
-  private function getStatus() : int {
-    if (isset($_POST['is_sketch'])) {
-      $status = ArticleHelper::SKETCH;
-    } else {
-      $status = ArticleHelper::NOT_PUBLICATED;
-    }
-    return $status;
+    return false;
   }
 
   /**
-   * Returns 30 characters
+   * Returns 40 characters
    * version of article's title
    */
   public function shortTitle() : string {
@@ -142,182 +123,94 @@ class Article extends Model
     return $out;
   }
 
-  /*
-   * Created for article table, sets css
-   * class thats decorated the status info
-   */
-  public function statusClass() : string {
-    if ($this->status == ArticleHelper::NOT_PUBLICATED) {
+  private function generateSlug() : string {
+    $slug = $this->createSlug();
+    if ($this->find_by_sql("SELECT * FROM article WHERE slug='" . $slug . "'")) {
+      $i = 1;
+      while ($this->find_by_sql("SELECT * FROM article WHERE slug='" . $slug . "-" . $i . "'")) {
+        $i++;
+      }
+      $slug = $slug . '-' . $i;
+    }
+    return $slug;
+  }
+
+  private function createSlug() : string {
+    $slug = $this->title;
+    $slug = preg_replace('~[^\pL\d]+~u', '-', $slug);
+    $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+    $slug = preg_replace('~[^-\w]+~', '', $slug);
+    $slug = trim($slug, '-');
+    $slug = preg_replace('~-+~', '-', $slug);
+    $slug = strtolower($slug);
+    if (empty($slug)) {
+      return 'n-a';
+    }
+    return $slug;
+  }
+
+  public function getStatusName() : string {
+    $name = '';
+    if ($this->status == self::UNPUBLICATED) {
+      $name = 'Nieopublikowany';
+    } elseif ($this->status == self::PUBLICATED) {
+      $name = 'Publiczny';
+    } elseif ($this->status == self::REMOVED) {
+      $name = 'Usunięty';
+    } elseif ($this->status == self::SKETCH) {
+      $name = 'Szkic';
+    }
+    return $name;
+  }
+
+  public function getStatusClass() : string {
+    $class = '';
+    if ($this->status == self::UNPUBLICATED) {
       $class = 'model-hidden';
-    } elseif ($this->status == ArticleHelper::PUBLICATED) {
+    } elseif ($this->status == self::PUBLICATED) {
       $class = 'model-active';
-    } elseif ($this->status == ArticleHelper::REMOVED) {
+    } elseif ($this->status == self::REMOVED) {
       $class = 'model-removed';
-    } elseif ($this->status == ArticleHelper::SKETCH) {
+    } elseif ($this->status == self::SKETCH) {
       $class = 'model-sketch';
     }
     return $class;
   }
 
-  public function availableForGuest() : bool {
-    if (!$this->isPending() && $this->status == ArticleHelper::PUBLICATED) {
-      $category = Category::getById($this->category_id);
-      if ($category && $category->status == CategoryHelper::STATUS_ACTIVE) {
-        return true;
-      }
+  public function isPublicated() {
+    if ($this->status == self::PUBLICATED) {
+      return true;
     }
     return false;
   }
 
-  public function isRemoved() : bool {
-    if ($this->status == ArticleHelper::REMOVED) {
+  public function isUnpublicated() {
+    if ($this->status == self::UNPUBLICATED) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isRemoved() {
+    if ($this->status == self::REMOVED) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isSketch() {
+    if ($this->status == self::SKETCH) {
       return true;
     }
     return false;
   }
 
   public function isEdited() : bool {
-    if ($this->created_at < $this->updated_at) {
-      return true;
+    if ($this->created_at == $this->updated_at) {
+      return false;
     }
-    return false;
+    return true;
   }
 
-  public function isPublicated() : bool {
-    if ($this->status == ArticleHelper::PUBLICATED) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * When occures specific status, sets
-   * current time to created_at field
-   */
-  private function resetTimestampsWhenStatus(int $status) : void {
-    if ($this->status == $status)  {
-      $this->created_at = time();
-      $this->updated_at = time();
-      $this->available_from = time();
-    }
-  }
-
-  /**
-   * Changes article status depends on passed param
-   * @param string $status
-   * @param array $message has two assoc array: content & type
-   * @return FlashConf
-   */
-  public function updateStatus(string $status) : FlashConf {
-    $flashConf = new FlashConf();
-    $availableStatus = true;
-
-    if ($status == ArticleHelper::STATUS_PUBLIC) {
-      $this->resetTimestampsWhenStatus(ArticleHelper::SKETCH);
-      $this->status = ArticleHelper::PUBLICATED;
-    } elseif ($status == ArticleHelper::STATUS_NOT_PUBLIC) {
-      $this->resetTimestampsWhenStatus(ArticleHelper::SKETCH);
-      $this->status = ArticleHelper::NOT_PUBLICATED;
-    } elseif ($status == ArticleHelper::STATUS_REMOVED) {
-      $this->status = ArticleHelper::REMOVED;
-    } else {
-      $flashConf->set('error', "Błędny status: $status");
-      $availableStatus = false;
-    }
-
-    if ($availableStatus) {
-      if ($this->update(false)) {
-        $flashConf->set('success', "Pomyślnie zmieniono status artukułu ($this->title) na: " . ArticleHelper::getStatus()[$this->status]);
-      } else {
-        $flashConf->set('error', "Błąd podczas zmiany statusu artykułu ($this->title)!");
-      }
-    }
-    return $flashConf;
-  }
-
-  /**
-   * If slug alredy exists in table,
-   * add number in the slug's end
-   * @param string $slug
-   * @return string $slug
-   */
-  private function checkSlug(string $slug) : string {
-    try {
-      $db = new DbConnection();
-      $db = $db->connect();
-      $statement = $db->prepare("SELECT * FROM article WHERE slug = '" . $slug . "'");
-      $statement->execute();
-      $rows = $statement->fetchAll();
-
-      if (count($rows)) {
-        $process = true;
-        $i = 1;
-        while ($process) {
-            $statement = $db->prepare("SELECT * FROM article WHERE slug = '" . $slug . "-" . $i . "'");
-            $statement->execute();
-            $rows = $statement->fetchAll();
-            if (count($rows)) {
-              $i++;
-            } else {
-              $slug .= "-$i";
-              $process = false;
-              $db = null;
-            }
-        }
-      }
-    } catch (PDOException $e) {
-      var_dump('Wyjątek PDO - ARTICLE - CHECKSLUG()');die;
-    }
-    return $slug;
-  }
-
-  /**
-   * Load data from post response when you
-   * edit whole article. Doesnt change the status
-   */
-  public function loadEditions() : void {
-    $this->title = $_POST['title'];
-    $this->content = $_POST['content'];
-    $this->category_id = $_POST['category_id'];
-    $this->available_from = $this->getAvailableFrom();
-  }
-
-  public function routeParam() : string {
-    $routeParam = '';
-    if ($this->status == ArticleHelper::PUBLICATED) {
-      $routeParam = 'publicated';
-    } elseif ($this->status == ArticleHelper::NOT_PUBLICATED) {
-      $routeParam = 'notpublicated';
-    } elseif ($this->status == ArticleHelper::REMOVED) {
-      $routeParam = 'removed';
-    } elseif ($this->status == ArticleHelper::SKETCH) {
-      $routeParam = 'sketch';
-    }
-    return $routeParam;
-  }
-
-  public function routeRemoveParam() : string {
-    if ($this->status == ArticleHelper::SKETCH) {
-      $routeParam = 'sketch';
-    } else {
-      $routeParam = 'removed';
-    }
-    return $routeParam;
-  }
-
-  /**
-   * If guest user turns on article view,
-   * method increments views number
-   */
-  public function incrementViewsNumber() : void {
-    if (AccessControl::isGuest()) {
-      $this->views++;
-      //TODO dobrze by było coś zrobić w przypadku
-      //gdy wystąpi błąd podaczas zapisywania zmian
-      //inkrementacji kolumny 'views', na tą chwile nic
-      //nie będzie wiadomo
-      $this->update(false);
-    }
-  }
 
 }

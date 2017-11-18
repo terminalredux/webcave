@@ -1,12 +1,15 @@
 <?php
+use App\Components\Helpers\ArticleHelper;
+
 if ($editMode) {
   $action = "article/edit/$article->id";
 } else {
   $action = "article/add";
 }
 ?>
-<h1><?= $editMode ? 'Edytuj artykuł' : 'Nowy artykuł' ?></h1>
 <form action="<?= URL . $action ?>" method="post" id="articleForm">
+  <h1><?= $editMode ? 'Edycja artykułu' : 'Dodaj artykuł' ?></h1>
+  <br>
   <?php if (!$editMode) :?>
     <div class="row text-right">
       <div class="checkbox">
@@ -30,71 +33,46 @@ if ($editMode) {
           <?php endif; ?>
           <?php foreach ($categories as $category) : ?>
             <?php if ($editMode && $category->id == $article->category_id) : ?>
-              <option value="<?= $category->id ?>" selected="selected"><?= $category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
+              <option value="<?= $category->id ?>" selected="selected"><?= $category->name ?></option>
             <?php else : ?>
-              <option value="<?= $category->id ?>"><?= $category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
+              <option value="<?= $category->id ?>"><?= $category->name ?></option>
             <?php endif; ?>
+
           <?php endforeach; ?>
         </select>
       </div>
     </div>
   </div>
-  <?php if ($editMode && $article->isSketch()) : ?>
-  <?php else: ?>
-    <div class="row" id="available-form-row">
-      <div class="col-md-3" style="padding-left: 0">
-        <button class="btn btn-info" id="btn-set-pub-date" style="width: 100%">Ustaw date publikacji</button>
-      </div>
-      <div class="col-md-3">
-        <div id="setting-pub-date">
-          <div class="form-group" style="margin-bottom: 0;">
-            <div class='input-group date' id='available-from-datetimepicker'>
-                <input type="text"
-                       name="available_from"
-                       id="available_from"
-                       class="form-control"
-                       value="<?= $editMode ? $article->available_from->format('d-m-Y H:i') : '' ?>"
-                       placeholder="Data dodania wpisu">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
+    <?php if ($editMode && $article->status == ArticleHelper::SKETCH) : ?>
+    <?php else: ?>
+      <div class="row" id="available-form-row">
+        <div class="col-md-3" style="padding-left: 0">
+          <button class="btn btn-info" id="btn-set-pub-date" style="width: 100%">Ustaw date publikacji</button>
+        </div>
+        <div class="col-md-3">
+          <div id="setting-pub-date">
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class='input-group date' id='available-from-datetimepicker'>
+                  <input type="text"
+                         name="available_from"
+                         id="available_from"
+                         class="form-control"
+                         value="<?= $editMode ? date('d-m-Y H:i', $article->available_from) : '' ?>"
+                         placeholder="Zmieniona data dodania wpisu">
+                  <span class="input-group-addon">
+                      <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  <?php endif; ?>
+    <?php endif; ?>
   <br>
   <div class="row">
     <div class="form-group">
       <label for="content">Treść</label>
       <textarea id="content" name="content" class="form-control"><?= $editMode ? $article->content : '' ?></textarea>
-    </div>
-  </div>
-  <div class="row" id="settings">
-    <div class="col-md-6" style="padding-left: 0;">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h5 style="margin: 0;">Ustawienia</h5>
-        </div>
-        <div class="panel-body" style="padding-left: 25px;">
-          <div class="row">
-            <div class="checkbox">
-              <label for="comments_adding"><input type="checkbox" value="1" name="comments_adding" id="comments_adding">Dodawanie komentarzy</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="checkbox">
-              <label for="comments_showing"><input type="checkbox" value="1" name="comments_showing" id="comments_showing">Wyświetlanie komentarzy</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="checkbox">
-              <label for="views_showing"><input type="checkbox" value="1" name="views_showing" id="views_showing">Wyświetlanie licznika odwiedźin</label>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
   <div class="row" style="margin-bottom: 30px;">
@@ -114,11 +92,12 @@ $(function() { $('textarea').froalaEditor({
 </script>
 <script>
 $('document').ready(function(){
+  //available-form-row
+  //var isSketch = $('input[name=is_sketch]:checked');
   $('#is_sketch').val($(this).is(':checked'));
 
     $('#is_sketch').change(function() {
         $('#available-form-row').fadeToggle();
-        $('#settings').fadeToggle();
     });
 
 
@@ -134,7 +113,6 @@ $('document').ready(function(){
     });
   });
 
-
   $('#articleForm').validate({
     rules: {
       title: {
@@ -143,8 +121,7 @@ $('document').ready(function(){
         maxlength: 255
       },
       content: {
-        required: true,
-        minlength: 50
+        required: true
       },
       category_id: {
         required: true,
@@ -152,7 +129,6 @@ $('document').ready(function(){
       }
     }
   });
-
 
 });
 </script>

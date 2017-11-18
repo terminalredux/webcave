@@ -1,7 +1,7 @@
 <?php
 use App\Models\BaseCategory\BaseCategory;
 ?>
-<h1>Kategorie bazowe (<?= $title ?>)</h1>
+<h1>Kategorie główne (<?= $title ?>)</h1>
 <?= $this->render('basecategory/form', ['editMode' => $editMode]); ?>
 <br><br><br><br><br><br>
 <div class="col-md-12">
