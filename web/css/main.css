@@ -128,6 +128,29 @@ a.fa-icon:hover {
   transition: background-color 200ms linear;
 }
 
+.tag {
+  margin-top: 5px;
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.0);
+  border: 1px solid #16a085;
+  color: #16a085;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
+.tag:visited {
+  color: #16a085;
+}
+
+.tag:hover {
+  background-color: #16a085;
+  color: #fdfdfd;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
 /** Article table **/
 .article-status {
   cursor:pointer;

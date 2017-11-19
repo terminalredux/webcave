@@ -88,8 +88,8 @@
           </li>
         </ul>
       </li>
-      <li>
-        <a href="#"><i class="fa fa-hashtag"></i> <span>Tagi</span></a>
+      <li class="<?= $app->checkController('tag') ? 'active' : '' ?>">
+        <a href="<?= URL ?>tag/list"><i class="fa fa-hashtag"></i> <span>Tagi</span></a>
       </li>
       <li>
         <a href="#"><i class="fa fa-file-image-o"></i> <span>Zdjęcia</span></a>
