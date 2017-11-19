@@ -30,9 +30,9 @@ if ($editMode) {
           <?php endif; ?>
           <?php foreach ($categories as $category) : ?>
             <?php if ($editMode && $category->id == $article->category_id) : ?>
-              <option value="<?= $category->id ?>" selected="selected"><?= $category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
+              <option value="<?= $category->id ?>" selected="selected"><?= $category->name ?> - <?= $category->base_category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
             <?php else : ?>
-              <option value="<?= $category->id ?>"><?= $category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
+              <option value="<?= $category->id ?>"><?= $category->name ?> - <?= $category->base_category->name ?> <?= $category->isHiddenGlobaly() ? '(Ukryty)' : '' ?></option>
             <?php endif; ?>
           <?php endforeach; ?>
         </select>

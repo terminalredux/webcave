@@ -93,10 +93,22 @@ class Article extends \ActiveRecord\Model
     }
     if (isset($_POST['available_from']) && ($this->available_from->format('d-m-Y H:m') != $_POST['available_from'])) {
       $this->available_from = $_POST['available_from'];
+      $edited = true;
     }
 
 
     return $edited;
+  }
+
+  public static function statusExistsForRoute(string $status) : bool {
+    if (in_array($status, self::statusAlias())) {
+      return true;
+    }
+    return false;
+  }
+
+  public static function pendingList(array $articles) : array {
+    return [];
   }
 
   public static function statusExists(string $status) : bool {
@@ -111,6 +123,10 @@ class Article extends \ActiveRecord\Model
       return true;
     }
     return false;
+  }
+
+  public static function statusByAlias() : array {
+    return array_flip(self::statusAlias());
   }
 
   /**
@@ -175,6 +191,15 @@ class Article extends \ActiveRecord\Model
       $class = 'model-sketch';
     }
     return $class;
+  }
+
+  public function isPending() {
+    $now = new \DateTime();
+    $now->format('Y-m-d H:i:s');
+    if ($this->available_from > $now) {
+      return true;
+    }
+    return false;
   }
 
   public function isPublicated() {

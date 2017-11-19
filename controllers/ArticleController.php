@@ -20,10 +20,26 @@ class ArticleController extends Controller
     return $this->executeAction('article/list');
   }
 
-  public function actionList() {
+  public function actionList(string $slug = 'publicated') {
     AccessControl::onlyForLogged();
 
-    $articles = Article::all();
+    if ($slug == 'pending') {
+      $status = Article::PUBLICATED;
+      $order = 'available_from DESC';
+    } elseif (Article::statusExistsForRoute($slug)) {
+      $status = Article::statusByAlias()[$slug];
+      $order = 'updated_at DESC';
+    } else {
+      return (new ErrorController)->pageNotFound("Nie znaleziono!");
+    }
+
+    $articles = Article::all([
+      'order' => $order,
+      'conditions' => ['status' => $status]
+    ]);
+    if ($slug == 'pending') {
+      //$articles = Article::pendingList($articles);
+    }
 
     return $this->render('article/list', [
       'articles' => $articles
@@ -62,7 +78,6 @@ class ArticleController extends Controller
 
   public function actionAdd() {
     AccessControl::onlyForLogged();
-
     $join = 'INNER JOIN base_category bc ON(category.base_category_id = bc.id)';
     $sel = 'category.*, bc.status as base_category_status';
     $categories = Category::all([
@@ -75,12 +90,14 @@ class ArticleController extends Controller
     if ($this->isPost()) {
       $article = new Article();
       $article->loadCreate();
+      $param = '';
       if ($article->save()) {
+        $param = $article->isSketch() ? 'sketch' : 'unpublicated';
         $this->success('Pomyślnie utworzono nowy artykuł!');
       } else {
         $this->error(implode('<br>', $article->errors->full_messages()));
       }
-      $this->executeAction('article/list');
+      $this->executeAction('article/list/' . $param);
     }
 
     return $this->render('article/form', [

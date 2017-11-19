@@ -84,6 +84,28 @@ a.fa-icon:hover {
 }
 
 /** Tag/Category buttons **/
+.base-category {
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0.0);
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
+.base-category:visited {
+  color: #c0392b;
+}
+
+.base-category:hover {
+  background-color: #c0392b;
+  color: #fdfdfd;
+  -webkit-transition: background-color 200ms linear;
+  -ms-transition: background-color 200ms linear;
+  transition: background-color 200ms linear;
+}
+
 .category {
   border-radius: 0;
   background-color: rgba(0, 0, 0, 0.0);
@@ -117,7 +139,7 @@ a.fa-icon:hover {
   padding: 2px;
   font-size: 0.9em;
 }
-.date-pending {
+.model-pending {
   background-color: #9b59b6;
   border-radius: 10px;
   color: #fefefe;

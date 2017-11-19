@@ -1,18 +1,20 @@
 <h1>Artykuły ()</h1>
+<br>
+<small>Sortowanie: data zmodyfikowania</small>
 <br><br>
 <div class="row">
   <div class="col-md-12">
     <table class="table table-striped table-hover" style="font-size: 0.9em;">
       <thead>
-        <th>Tytuł</th>
-        <th>Kategoria</th>
-        <th>Data publikacji</th>
-        <th>Utworzony</th>
-        <th>Zmodyfikowany</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Tytuł</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Kategoria</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Data publikacji</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Utworzony</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Zmodyfikowany</th>
         <th class="text-center">
           <i class="fa fa-eye" aria-hidden="true" title="Liczba wyświetleń przez gości"></i>
         </th>
-        <th>Status</th>
+        <th><i class="fa fa-sort" aria-hidden="true"></i> Status</th>
         <th></th>
       </thead>
       <tbody>
@@ -25,7 +27,9 @@
               </div>
             </td>
             <td class="text-center">
-              <?= $article->available_from ? $article->available_from->format('d/m/Y H:i') : '-' ?>
+              <div class="<?= $article->isPending() ? 'model-pending' : '' ?>" title="<?= $article->isPending() ? 'Dopiero oczekuje na publikacje' : '' ?>">
+                <?= $article->available_from ? $article->available_from->format('d/m/Y H:i') : '-' ?>
+              </div>
             </td>
             <td><?= $article->created_at->format('d/m/Y H:i') ?></td>
             <td class="text-center">

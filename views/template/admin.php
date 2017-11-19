@@ -37,11 +37,11 @@
           <i class="fa fa-file-text-o"></i> <span>Artykuły</span> <i class="fa fa-angle-left pull-right"></i>
         </a>
         <ul class="treeview-menu <?= $app->checkAction('article/list') ? 'menu-open' : '' ?>" style="<?= $app->checkAction('article/list') ? 'display: block;' : '' ?>">
-          <li><a href="<?= URL ?>article/list/active"><i class="fa fa-check"></i> Aktywne</a></li>
+
           <li><a href="<?= URL ?>article/list/publicated"><i class="fa fa-eye"></i> Publiczne</a></li>
-          <li><a href="<?= URL ?>article/list/notpublicated"><i class="fa fa-eye-slash"></i> Niepubliczne</a></li>
+          <li><a href="<?= URL ?>article/list/unpublicated"><i class="fa fa-eye-slash"></i> Niepubliczne</a></li>
           <li><a href="<?= URL ?>article/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
-          <li><a href="#"><i class="fa fa-clock-o"></i> Oczekujące</a></li>
+          <li><a href="<?= URL ?>article/list/pending"><i class="fa fa-clock-o"></i> Oczekujące</a></li>
           <li><a href="<?= URL ?>article/list/sketch"><i class="fa fa-sticky-note-o"></i> Szkice</a></li>
         </ul>
       </li>
