@@ -26,9 +26,6 @@
     <section style="width: 250px; pos">
     <ul class="sidebar-menu">
       <li class="header">PANEL ADMINISTRACYJNY</li>
-      <li>
-        <a href="#"><i class="fa fa-envelope"></i> <span>Wiadomości</span><small class="label pull-right label-info">nowa!</small></a>
-      </li>
       <li class="<?= $app->checkAction('article/add') ? 'active' : '' ?>">
         <a href="<?= URL ?>article/add"><i class="fa fa-pencil"></i> <span>Napisz artykuł</span></a>
       </li>
@@ -43,15 +40,6 @@
           <li><a href="<?= URL ?>article/list/removed"><i class="fa fa-trash"></i> Usunięte</a></li>
           <li><a href="<?= URL ?>article/list/pending"><i class="fa fa-clock-o"></i> Oczekujące</a></li>
           <li><a href="<?= URL ?>article/list/sketch"><i class="fa fa-sticky-note-o"></i> Szkice</a></li>
-        </ul>
-      </li>
-      <li class="treeview <?= $app->checkAction('comment/list') ? 'active' : '' ?>">
-        <a href="#">
-          <i class="fa fa-comments-o"></i> <span>Komentarze</span> <i class="fa fa-angle-left pull-right"></i>
-        </a>
-        <ul class="treeview-menu">
-          <li><a href="<?= URL ?>comment/list/not-publicated"><i class="fa fa-check"></i> Do akceptacji</a></li>
-          <li><a href="<?= URL ?>comment/list/removed"><i class="fa fa-check"></i> Usunięte</a></li>
         </ul>
       </li>
       <?php
@@ -87,24 +75,6 @@
             </ul>
           </li>
         </ul>
-      </li>
-      <li class="<?= $app->checkController('tag') ? 'active' : '' ?>">
-        <a href="<?= URL ?>tag/list"><i class="fa fa-hashtag"></i> <span>Tagi</span></a>
-      </li>
-      <li>
-        <a href="#"><i class="fa fa-file-image-o"></i> <span>Zdjęcia</span></a>
-      </li>
-      <li>
-        <a href="#"><i class="fa fa-pie-chart"></i> <span>Statystyki</span></a>
-      </li>
-      <li>
-        <a href="#"><i class="fa fa-cogs"></i> <span>Ustawienia</span></a>
-      </li>
-      <li>
-        <a href="#"><i class="fa fa-user-circle"></i> <span>Profil</span></a>
-      </li>
-      <li>
-        <a href="#"><i class="fa fa-book"></i> <span>Instrukcja</span></a>
       </li>
     </ul>
   </section>

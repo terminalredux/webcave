@@ -71,32 +71,6 @@ if ($editMode) {
       <textarea id="content" name="content" class="form-control"><?= $editMode ? $article->content : '' ?></textarea>
     </div>
   </div>
-  <div class="row" id="settings">
-    <div class="col-md-6" style="padding-left: 0;">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h5 style="margin: 0;">Ustawienia</h5>
-        </div>
-        <div class="panel-body" style="padding-left: 25px;">
-          <div class="row">
-            <div class="checkbox">
-              <label for="comments_adding"><input type="checkbox" value="1" name="comments_adding" id="comments_adding">Dodawanie komentarzy</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="checkbox">
-              <label for="comments_showing"><input type="checkbox" value="1" name="comments_showing" id="comments_showing">Wyświetlanie komentarzy</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="checkbox">
-              <label for="views_showing"><input type="checkbox" value="1" name="views_showing" id="views_showing">Wyświetlanie licznika odwiedźin</label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="row" style="margin-bottom: 30px;">
     <button type="submit" class="btn btn-success"><?= $editMode ? 'Edytuj' : 'Dodaj' ?></button>
   </div>
@@ -118,7 +92,6 @@ $('document').ready(function(){
 
     $('#is_sketch').change(function() {
         $('#available-form-row').fadeToggle();
-        $('#settings').fadeToggle();
     });
 
 

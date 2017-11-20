@@ -12,7 +12,7 @@
 
   <title>webcave.pl</title>
   <meta name="description" content="WebCave">
-  <meta name="author" content="IsoSub5">
+  <meta name="Woland" content="WebCave">
 
   <link rel="stylesheet" href="<?= URL ?>vendor/bower/bootstrap/dist/css/bootstrap.min.css">
   <script src="<?= URL ?>vendor/bower/jquery/dist/jquery.min.js"></script>
