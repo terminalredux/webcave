@@ -1,6 +1,9 @@
 <?php
 namespace App\Models\Article;
 
+use App\Models\Category\Category;
+use App\Models\BaseCategory\BaseCategory;
+
 class Article extends \ActiveRecord\Model
 {
   const UNPUBLICATED = 1;
@@ -54,6 +57,16 @@ class Article extends \ActiveRecord\Model
       2 => 'publicated',
       3 => 'removed',
       4 => 'sketch'
+    ];
+  }
+
+  public static function listType() {
+    return [
+      'unpublicated' => 'niepubliczne',
+      'publicated' => 'publiczne',
+      'removed' => 'usunięte',
+      'sketch' => 'szkice',
+      'pending' => 'oczekujące'
     ];
   }
 
@@ -202,6 +215,13 @@ class Article extends \ActiveRecord\Model
     return false;
   }
 
+  public function availableForGuest(): bool {
+    if (!$this->isPending() && $this->isPublicGlobaly()) {
+      return true;
+    }
+    return false;
+  }
+
   public function isPublicated() {
     if ($this->status == self::PUBLICATED) {
       return true;
@@ -236,6 +256,92 @@ class Article extends \ActiveRecord\Model
     }
     return true;
   }
+
+  public function getStautsAlias() : string {
+    $now = new \DateTime();
+    $now->format('Y-m-d H:i:s');
+    if ($this->isPublicated() && $this->category->isActive() && $this->category->base_category->isActive() && ($this->available_from > $now)) {
+      $alias = 'pending';
+    } elseif (($this->category->base_category->isHidden() && !$this->category->isRemoved() && !$this->isSketch() && !$this->isRemoved()) ||
+             ($this->category->isHidden() && !$this->category->base_category->isRemoved() && !$this->isSketch() && !$this->isRemoved()) ||
+             $this->isUnpublicated() && !$this->category->isRemoved() && !$this->category->base_category->isRemoved()) {
+      $alias = 'unpublicated';
+    } elseif (($this->isRemoved() || $this->category->isRemoved() || $this->category->base_category->isRemoved()) && !$this->isSketch()) {
+      $alias = 'removed';
+    } elseif ($this->isSketch()) {
+      $alias = 'sketch';
+    } else {
+      $alias = 'publicated';
+    }
+    return $alias;
+  }
+
+  /**
+   * Checks if article's category &
+   * base category  is active.
+   */
+  public function isPublicGlobaly() : bool {
+    if ($this->isPublicated() && $this->category->isActiveGlobaly()) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * For article list
+   */
+  public function isUnpublicatedGlobaly() : bool {
+    if (($this->isUnpublicated() && !$this->category->base_category->isRemoved() && !$this->category->isRemoved()) ||
+    ($this->category->isHidden() && !$this->isSketch() && !$this->isRemoved()) ||
+    $this->category->base_category->isHidden()) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Prepare list depends on
+   * provided slug
+   */
+   public static function prepareList(string $slug) : array {
+     $finalList = [];
+     $articles = self::all();
+     if ($slug == 'publicated') {
+       foreach ($articles as $article) {
+         if ($article->isPublicGlobaly() && !$article->isPending()) {
+           $finalList[] = $article;
+         }
+       }
+     } elseif ($slug == 'unpublicated') {
+       foreach ($articles as $article) {
+         if ($article->isUnpublicatedGlobaly()) {
+           $finalList[] = $article;
+         }
+       }
+     } elseif ($slug == 'sketch') {
+       foreach ($articles as $article) {
+         if ($article->isSketch()) {
+           $finalList[] = $article;
+         }
+       }
+     } elseif ($slug == 'pending') {
+       foreach ($articles as $article) {
+         if ($article->isPublicated() && $article->isPending()) {
+           $finalList[] = $article;
+         }
+       }
+     } elseif ($slug == 'removed') {
+       foreach ($articles as $article) {
+         if ($article->status == self::REMOVED || $article->category->status == Category::REMOVED || $article->category->base_category->status == BaseCategory::REMOVED){
+           $finalList[] = $article;
+         }
+       }
+     }
+
+
+
+     return $finalList;
+   }
 
 
 }

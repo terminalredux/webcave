@@ -131,6 +131,7 @@ class BaseCategory extends \ActiveRecord\Model
   public function loadCreate() {
     $time = time();
     $this->name = $_POST['name'];
+    $this->slug = $this->generateSlug();
     $this->status = self::ACTIVE;
     $this->created_at = $time;
     $this->updated_at = $time;
@@ -138,6 +139,33 @@ class BaseCategory extends \ActiveRecord\Model
 
   public function loadEdition() {
     $this->name = $_POST['name'];
+    $this->slug = $this->generateSlug();
     $this->updated_at = time();
+  }
+
+  private function generateSlug() : string {
+    $slug = $this->createSlug();
+    if ($this->find_by_sql("SELECT * FROM base_category WHERE slug='" . $slug . "'")) {
+      $i = 1;
+      while ($this->find_by_sql("SELECT * FROM article WHERE slug='" . $slug . "-" . $i . "'")) {
+        $i++;
+      }
+      $slug = $slug . '-' . $i;
+    }
+    return $slug;
+  }
+
+  private function createSlug() : string {
+    $slug = $this->name;
+    $slug = preg_replace('~[^\pL\d]+~u', '-', $slug);
+    $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+    $slug = preg_replace('~[^-\w]+~', '', $slug);
+    $slug = trim($slug, '-');
+    $slug = preg_replace('~-+~', '-', $slug);
+    $slug = strtolower($slug);
+    if (empty($slug)) {
+      return 'n-a';
+    }
+    return $slug;
   }
 }

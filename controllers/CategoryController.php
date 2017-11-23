@@ -124,6 +124,27 @@ class CategoryController extends Controller
     return $this->executeAction('category/list/removed');
   }
 
+  /**
+   * group is alias for base-category
+   */
+  public function actionMain(string $slug = null) {
+    $this->checkParams(compact('slug'), 'article/list');  // TODO to change
+    $baseCategory = BaseCategory::find_by_sql("SELECT * FROM base_category WHERE slug='" . $slug . "'");
+
+    if (!$baseCategory || !$baseCategory[0]->isActive()) {
+      return (new ErrorController)->pageNotFound("Nie znaleniono artykułów z tej kategorii głównej!");
+    }
+    $categories = $baseCategory[0]->categories;
+    return $this->render('category/base-category-list', [
+      'categories' => $categories
+    ]);
+  }
+
+  public function actionAll() {
+    $baseCategories = BaseCategory::all();
+    return $this->render('category/all', ['list' => $baseCategories]);
+  }
+
   private function findModel(int $id) {
     if (Category::exists($id)) {
       return Category::find($id);

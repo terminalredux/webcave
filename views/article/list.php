@@ -1,4 +1,7 @@
-<h1>Artykuły ()</h1>
+<?php
+use App\Models\BaseCategory\BaseCategory;
+?>
+<h1>Artykuły (<?= $listType ?>)</h1>
 <br>
 <small>Sortowanie: data zmodyfikowania</small>
 <br><br>
@@ -22,7 +25,8 @@
           <tr>
             <td title="<?= $article->title ?>"><?= $article->shortTitle() ?></td>
             <td class="text-center">
-              <div class="<?= $article->category->getCategoryClass() ?>">
+              <div class="<?= $article->category->getCategoryClass() ?>"
+                   title="Kategoria bazowa <?= $article->category->base_category->name ?> (<?= BaseCategory::getStatus()[$article->category->base_category->status] ?>)">
                 <?= $article->category->name ?>
               </div>
             </td>

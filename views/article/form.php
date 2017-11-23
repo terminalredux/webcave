@@ -75,19 +75,23 @@ if ($editMode) {
     <button type="submit" class="btn btn-success"><?= $editMode ? 'Edytuj' : 'Dodaj' ?></button>
   </div>
 </form>
+<?php
+//'C:/xampp/htdocs/webcave/components/froala/upload_image.php';
+?>
 
 <!-- Froala Editor -->
 <script type="text/javascript" src="<?= URL ?>vendor\bower\codemirror\lib\codemirror.js"></script>
 <script type="text/javascript" src="<?= URL ?>vendor\bower\codemirror\mode\xml\xml.js"></script>
 <script type="text/javascript" src="<?= URL ?>vendor\bower\froala-wysiwyg-editor\js\froala_editor.pkgd.min.js"></script>
-<script>
-$(function() { $('textarea').froalaEditor({
-  tabSpaces: 4,
-  })
-});
-</script>
+<script src="<?= URL ?>vendor/bower/froala-wysiwyg-editor/js/plugins/image_manager.min.js"></script>
 <script>
 $('document').ready(function(){
+  $(function() { $('textarea').froalaEditor({
+    tabSpaces: 4,
+    })
+
+  });
+
   $('#is_sketch').val($(this).is(':checked'));
 
     $('#is_sketch').change(function() {

@@ -21,40 +21,34 @@ class ArticleController extends Controller
   }
 
   public function actionList(string $slug = 'publicated') {
-    AccessControl::onlyForLogged();
+      AccessControl::onlyForLogged();
+      if ($slug != 'pending' && !Article::statusExistsForRoute($slug)) {
+        return (new ErrorController)->pageNotFound("Nie znaleziono!");
+      }
+      $articles = Article::prepareList($slug);
+      return $this->render('article/list', [
+        'articles' => $articles,
+        'listType' => Article::listType()[$slug]
+      ]);
 
-    if ($slug == 'pending') {
-      $status = Article::PUBLICATED;
-      $order = 'available_from DESC';
-    } elseif (Article::statusExistsForRoute($slug)) {
-      $status = Article::statusByAlias()[$slug];
-      $order = 'updated_at DESC';
-    } else {
-      return (new ErrorController)->pageNotFound("Nie znaleziono!");
-    }
-
-    $articles = Article::all([
-      'order' => $order,
-      'conditions' => ['status' => $status]
-    ]);
-    if ($slug == 'pending') {
-      //$articles = Article::pendingList($articles);
-    }
-
-    return $this->render('article/list', [
-      'articles' => $articles
-    ]);
   }
 
   public function actionView(string $slug = null) {
     $this->checkParams(compact('id'), 'article/list');
     $article = Article::find_by_sql("SELECT * FROM article WHERE slug='" . $slug . "'");
-
     if (!$article) {
       return (new ErrorController)->pageNotFound("Nie znaleniono artykułu!");
     }
-
-    return $this->render('article/article', ['article' => $article[0]]);
+    if (AccessControl::isGuest()) {
+      if ($article[0]->availableForGuest()) {
+        return $this->render('article/article', ['article' => $article[0]]);
+      } else {
+        return (new ErrorController)->pageNotFound("Nie znaleniono artykułu!");
+      }
+    } else {
+      AccessControl::onlyForLogged();
+      return $this->render('article/article', ['article' => $article[0]]);
+    }
   }
 
   public function actionChangeStatus(int $id = null, string $status = null) {
@@ -72,8 +66,8 @@ class ArticleController extends Controller
     } else {
       $this->error("Zadany status: $status nie istnieje!");
     }
-    //$param = $category->chooseParam();
-    return $this->executeAction('article/list/');
+    $param = $article->getStautsAlias();
+    return $this->executeAction('article/list/' . $param);
   }
 
   public function actionAdd() {
@@ -130,10 +124,11 @@ class ArticleController extends Controller
       } else {
         $this->success("Nie trzeba było niczego zmieniać!");
       }
-      return $this->executeAction('article/list');
+      $param = $article->getStautsAlias();
+      return $this->executeAction('article/list/' . $param);
     }
 
-    return $this->render('article\form', [
+    return $this->render('article/form', [
       'article' => $article,
       'editMode' => true,
       'categories' => $categories
@@ -151,6 +146,28 @@ class ArticleController extends Controller
       $this->error(implode('<br>', $article->errors->full_messages()));
     }
     return $this->executeAction('article/list/removed');
+  }
+
+  public function actionCategory(string $slug = null) {
+    $this->checkParams(compact('slug'), 'article/list');  // TODO to change
+    $category = Category::find_by_sql("SELECT * FROM category WHERE slug='" . $slug . "'");
+    if (!$category || (!$category[0]->base_category->isActive() || !$category[0]->isActive())) {
+      return (new ErrorController)->pageNotFound("Nie znaleniono artykułów z tej kategorii!");
+    }
+    $articles = Article::all([
+      'order' => 'available_from DESC',
+      'conditions' => ['category_id' => $category[0]->id]
+    ]);
+    $list = [];
+    foreach ($articles as $article) {
+      if ($article->availableForGuest())
+        $list[] = $article;
+    }
+
+    return $this->render('article/public-list', [
+      'articles' => $list,
+      'title' => 'Kategoria ' .  $category[0]->name,
+    ]);
   }
 
   private function findModel(int $id) {

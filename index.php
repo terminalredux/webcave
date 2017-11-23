@@ -23,6 +23,8 @@
   <link rel="stylesheet" href="<?= URL ?>vendor/bower/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="<?= URL ?>web/css/main.css">
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet">
   <link rel='shortcut icon' type='image/x-icon' href='http://www.iconninja.com/files/75/658/333/square-development-programming-code-brackets-coding-website-icon.svg' />
   <!-- Admin's left menu -->
   <link rel="stylesheet" href="<?= URL ?>web/left-menu/dist/sidebar-menu.css">

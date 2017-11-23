@@ -11,6 +11,10 @@ class Category extends \ActiveRecord\Model
 
   static $table_name = 'category';
 
+  static $has_many  = [
+    ['articles' ,'class_name' => '\App\Models\Article\Article']
+  ];
+
   static $belongs_to  = [
     ['base_category' ,'class_name' => '\App\Models\BaseCategory\BaseCategory', 'foreign_key' => 'base_category_id']
   ];
@@ -49,6 +53,7 @@ class Category extends \ActiveRecord\Model
 
   public function loadCreate() : void {
     $this->name = $_POST['name'];
+    $this->slug = $this->generateSlug();
     if (isset($_POST['base_category_id'])) {
       $this->base_category_id = $_POST['base_category_id'];
     }
@@ -57,6 +62,7 @@ class Category extends \ActiveRecord\Model
 
   public function loadEdition() {
     $this->name = $_POST['name'];
+    $this->slug = $this->generateSlug();
     $this->base_category_id = $_POST['base_category_id'];
   }
 
@@ -159,7 +165,14 @@ class Category extends \ActiveRecord\Model
   }
 
   public function isHiddenGlobaly() : bool {
-    if ($this->status == Category::HIDDEN || $this->base_category->status == BaseCategory::HIDDEN) {
+    if ($this->isHidden() || $this->base_category->status == BaseCategory::HIDDEN) {
+      return true;
+    }
+    return false;
+  }
+
+  public function isActiveGlobaly() : bool {
+    if ($this->status == Category::ACTIVE && $this->base_category->status == BaseCategory::ACTIVE) {
       return true;
     }
     return false;
@@ -230,5 +243,32 @@ class Category extends \ActiveRecord\Model
     }
     return false;
   }
+
+  private function generateSlug() : string {
+    $slug = $this->createSlug();
+    if ($this->find_by_sql("SELECT * FROM category WHERE slug='" . $slug . "'")) {
+      $i = 1;
+      while ($this->find_by_sql("SELECT * FROM article WHERE slug='" . $slug . "-" . $i . "'")) {
+        $i++;
+      }
+      $slug = $slug . '-' . $i;
+    }
+    return $slug;
+  }
+
+  private function createSlug() : string {
+    $slug = $this->name;
+    $slug = preg_replace('~[^\pL\d]+~u', '-', $slug);
+    $slug = iconv('utf-8', 'us-ascii//TRANSLIT', $slug);
+    $slug = preg_replace('~[^-\w]+~', '', $slug);
+    $slug = trim($slug, '-');
+    $slug = preg_replace('~-+~', '-', $slug);
+    $slug = strtolower($slug);
+    if (empty($slug)) {
+      return 'n-a';
+    }
+    return $slug;
+  }
+
 
 }

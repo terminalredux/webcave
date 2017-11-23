@@ -4,6 +4,7 @@ namespace App\Controllers;
 use Libs\Base\Controller;
 use Libs\Session\Session;
 use App\Models\LoginModel;
+use App\Models\Article\Article;
 
 class SiteController extends Controller
 {
@@ -15,11 +16,16 @@ class SiteController extends Controller
   }
 
   public function actionIndex() {
-    $this->view->render('site/index');
-  }
-
-  public function actionSearch() {
-    var_dump($_GET['txt']);die;
+    $articles = Article::all();
+    $list = [];
+    foreach ($articles as $article) {
+      if ($article->availableForGuest())
+        $list[] = $article;
+    }
+    return $this->render('article/public-list', [
+      'articles' => $list,
+      'title' => 'Najnowsze artykuły',
+    ]);
   }
 
   public function actionLogin() {

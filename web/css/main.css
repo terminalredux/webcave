@@ -1,5 +1,5 @@
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'PT Sans', sans-serif;
 }
 #setting-pub-date {
   display: none;
@@ -171,4 +171,9 @@ a.fa-icon:hover {
 pre {
   border-radius: 0;
   padding: 3px;
+}
+/** article list **/
+.article-list h3 a{
+  text-decoration: none;
+  color: inherit;
 }
