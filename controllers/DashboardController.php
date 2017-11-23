@@ -18,6 +18,7 @@ class DashboardController extends Controller
   }
 
   public function actionIndex() {
+    AccessControl::onlyForLogged();
     $this->view->render('dashboard/index');
   }
 }

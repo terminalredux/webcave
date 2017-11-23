@@ -8,8 +8,8 @@
         <ul>
           <?php foreach ($baseCategory->categories as $category) : ?>
             <?php if (count($category->articles) && $category->isActive()) : ?>
-            <li><a href="<?= URL ?>article/category/<?= $category->slug ?>"><?= $category->name ?> (<?= count($category->articles) ?>)</a></li>
-          <?php endif; ?>
+            <li><a href="<?= URL ?>article/category/<?= $category->slug ?>"><?= $category->name ?></a></li>
+            <?php endif; ?>
           <?php endforeach; ?>
         </ul>
       <?php endif; ?>

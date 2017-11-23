@@ -3,4 +3,4 @@
 /**
  * @const domain
  */
-define('URL', 'http://webcave.pl/');
+define('URL', 'http://webcave.local.pl/');
