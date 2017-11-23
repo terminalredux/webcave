@@ -177,3 +177,13 @@ pre {
   text-decoration: none;
   color: inherit;
 }
+.article-list h3 {
+  margin: 0;
+}
+.article-list a {
+  text-decoration: none;
+  color: inherit;
+}
+.article-list p {
+  margin-bottom: 0;
+}

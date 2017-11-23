@@ -166,7 +166,7 @@ class ArticleController extends Controller
 
     return $this->render('article/public-list', [
       'articles' => $list,
-      'title' => 'Kategoria ' .  $category[0]->name,
+      'title' => $category[0]->base_category->name . ' - ' .  $category[0]->name,
     ]);
   }
 

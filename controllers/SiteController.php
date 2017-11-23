@@ -16,7 +16,9 @@ class SiteController extends Controller
   }
 
   public function actionIndex() {
-    $articles = Article::all();
+    $articles = Article::all([
+      'order' => 'available_from DESC'
+    ]);
     $list = [];
     foreach ($articles as $article) {
       if ($article->availableForGuest())
